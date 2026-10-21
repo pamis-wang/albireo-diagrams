@@ -1,0 +1,394 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Albireo 系統架構與專案關係",
+    "output": "engineer/01-system-architecture.html",
+    "locale": "zh-TW",
+    "quality_profile": "showcase",
+    "views": [
+      {
+        "id": "portals",
+        "label": "三端前端與 API 主機",
+        "focus": [
+          "op_fe",
+          "org_fe",
+          "exh_fe",
+          "op_api",
+          "org_api",
+          "exh_api"
+        ],
+        "note": "一個前端只連一個 API 主機；三個權杖簽發者不互通，主辦與參展端網址帶主辦代碼。"
+      },
+      {
+        "id": "mcp",
+        "label": "AI 用戶端與 MCP 主機",
+        "focus": [
+          "ai_client",
+          "mcp",
+          "core"
+        ],
+        "note": "以後台帳號發行的 API 金鑰連線，權限等同發行者；只開放查詢，不呼叫 AI、不寄信。"
+      },
+      {
+        "id": "shared",
+        "label": "共用資料與外部服務",
+        "focus": [
+          "core",
+          "pg",
+          "redis",
+          "openrouter",
+          "smtp"
+        ],
+        "note": "所有主機共用同一個資料庫與 Redis；只有主辦與參展 API 主機會呼叫 OpenRouter。"
+      },
+      {
+        "id": "domains",
+        "label": "未完成：子網域與自有網域",
+        "focus": [
+          "domain",
+          "org_fe",
+          "exh_fe"
+        ],
+        "note": "資料表已建；HTTPS 憑證與動態 CORS 尚未處理，目前一律走路徑代碼。"
+      }
+    ]
+  },
+  "components": [
+    {
+      "id": "domain",
+      "type": "cloud",
+      "label": "子網域／自有網域",
+      "sublabel": "未完成 · 僅建資料表",
+      "tag": "未完成",
+      "pos": [
+        30,
+        292
+      ],
+      "size": [
+        150,
+        68
+      ]
+    },
+    {
+      "id": "op_fe",
+      "type": "frontend",
+      "label": "albireo-operator-frontend",
+      "sublabel": "營運後台 · :5175",
+      "pos": [
+        230,
+        80
+      ],
+      "size": [
+        196,
+        68
+      ]
+    },
+    {
+      "id": "org_fe",
+      "type": "frontend",
+      "label": "albireo-organizer-frontend",
+      "sublabel": "主辦後台 · /{organizerCode}",
+      "pos": [
+        230,
+        222
+      ],
+      "size": [
+        196,
+        68
+      ]
+    },
+    {
+      "id": "exh_fe",
+      "type": "frontend",
+      "label": "albireo-exhibitor-frontend",
+      "sublabel": "參展專區 · 中英 · /{organizerCode}",
+      "pos": [
+        230,
+        364
+      ],
+      "size": [
+        196,
+        68
+      ]
+    },
+    {
+      "id": "ai_client",
+      "type": "external",
+      "label": "AI 用戶端",
+      "sublabel": "Claude Code／Desktop",
+      "brand": "claude",
+      "pos": [
+        230,
+        506
+      ],
+      "size": [
+        196,
+        68
+      ]
+    },
+    {
+      "id": "op_api",
+      "type": "backend",
+      "label": "Albireo.API.Operator",
+      "sublabel": ":5260 · 簽發 Albireo-Operator",
+      "pos": [
+        510,
+        80
+      ],
+      "size": [
+        190,
+        68
+      ]
+    },
+    {
+      "id": "org_api",
+      "type": "backend",
+      "label": "Albireo.API.Organizer",
+      "sublabel": ":5250 · 簽發 Albireo-Organizer",
+      "pos": [
+        510,
+        222
+      ],
+      "size": [
+        190,
+        68
+      ]
+    },
+    {
+      "id": "exh_api",
+      "type": "backend",
+      "label": "Albireo.API.Exhibitor",
+      "sublabel": ":5270 · 簽發 Albireo-Exhibitor",
+      "pos": [
+        510,
+        364
+      ],
+      "size": [
+        190,
+        68
+      ]
+    },
+    {
+      "id": "mcp",
+      "type": "backend",
+      "label": "Albireo.MCP ×3",
+      "sublabel": "唯讀 · :5261／5251／5271",
+      "pos": [
+        510,
+        506
+      ],
+      "size": [
+        190,
+        68
+      ]
+    },
+    {
+      "id": "core",
+      "type": "backend",
+      "label": "共用核心程式庫",
+      "sublabel": "Services · Repositories · Infrastructure",
+      "tag": "編入每個主機",
+      "pos": [
+        760,
+        287
+      ],
+      "size": [
+        230,
+        80
+      ]
+    },
+    {
+      "id": "pg",
+      "type": "database",
+      "label": "PostgreSQL",
+      "sublabel": "單一資料庫 · organizer_id",
+      "brand": "postgresql",
+      "pos": [
+        1170,
+        80
+      ],
+      "size": [
+        176,
+        68
+      ]
+    },
+    {
+      "id": "redis",
+      "type": "database",
+      "label": "Redis",
+      "sublabel": "權限快照 · token · 速配度",
+      "brand": "redis",
+      "pos": [
+        1170,
+        222
+      ],
+      "size": [
+        176,
+        68
+      ]
+    },
+    {
+      "id": "openrouter",
+      "type": "external",
+      "label": "OpenRouter",
+      "sublabel": "決策模型 · 語言模型",
+      "brand": "openrouter",
+      "pos": [
+        1170,
+        364
+      ],
+      "size": [
+        176,
+        68
+      ]
+    },
+    {
+      "id": "smtp",
+      "type": "external",
+      "label": "SMTP",
+      "sublabel": "邀請開通 · 重設密碼 · 審核通知",
+      "pos": [
+        1170,
+        506
+      ],
+      "size": [
+        176,
+        68
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "AlbireoBackend",
+      "wraps": [
+        "op_api",
+        "org_api",
+        "exh_api",
+        "mcp",
+        "core"
+      ],
+      "pad": 22
+    }
+  ],
+  "connections": [
+    {
+      "id": "c_dom_org",
+      "from": "domain",
+      "to": "org_fe",
+      "variant": "dashed"
+    },
+    {
+      "id": "c_dom_exh",
+      "from": "domain",
+      "to": "exh_fe",
+      "variant": "dashed"
+    },
+    {
+      "id": "c_op",
+      "from": "op_fe",
+      "to": "op_api",
+      "label": "營運權杖",
+      "variant": "emphasis"
+    },
+    {
+      "id": "c_org",
+      "from": "org_fe",
+      "to": "org_api",
+      "label": "主辦權杖",
+      "variant": "emphasis"
+    },
+    {
+      "id": "c_exh",
+      "from": "exh_fe",
+      "to": "exh_api",
+      "label": "參展權杖",
+      "variant": "emphasis"
+    },
+    {
+      "id": "c_ai",
+      "from": "ai_client",
+      "to": "mcp",
+      "label": "API 金鑰",
+      "variant": "security"
+    },
+    {
+      "id": "c_op_core",
+      "from": "op_api",
+      "to": "core"
+    },
+    {
+      "id": "c_org_core",
+      "from": "org_api",
+      "to": "core"
+    },
+    {
+      "id": "c_exh_core",
+      "from": "exh_api",
+      "to": "core"
+    },
+    {
+      "id": "c_mcp_core",
+      "from": "mcp",
+      "to": "core"
+    },
+    {
+      "id": "c_pg",
+      "from": "core",
+      "to": "pg",
+      "label": "EF Core",
+      "labelSegment": 2
+    },
+    {
+      "id": "c_redis",
+      "from": "core",
+      "to": "redis",
+      "label": "快取",
+      "labelSegment": 2
+    },
+    {
+      "id": "c_or",
+      "from": "core",
+      "to": "openrouter",
+      "label": "主辦／參展",
+      "labelSegment": 2
+    },
+    {
+      "id": "c_smtp",
+      "from": "core",
+      "to": "smtp",
+      "label": "寄信",
+      "labelSegment": 2
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "三端隔離",
+      "items": [
+        "三個權杖簽發者 Albireo-Operator／Organizer／Exhibitor，權杖不能跨端使用",
+        "OrganizerScopeMiddleware 比對權杖 organizer_id 與路由 {organizerCode}，不一致回 403",
+        "全域篩選 \"Organizer\" 預設拒絕；只有營運端 Repository 可 IgnoreQueryFilters"
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "MCP 主機",
+      "items": [
+        "API 金鑰前綴 alb_opr_／alb_org_／alb_exh_，權限與資料範圍等同發行者",
+        "第一版只開放查詢；刻意不給 AI Provider 金鑰，註冊拒絕寄信的 Provider",
+        "報名的信箱與電話要帶 includeContact 才回傳"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "外部服務",
+      "items": [
+        "OpenRouter：決策模型算速配度，語言模型以 SSE 串流推薦理由；AI 失敗不影響主要流程",
+        "Redis：權限快照、refresh token、速配度快取（30 天）",
+        "SMTP：開發環境寄到 Mailpit 沙盒"
+      ]
+    }
+  ]
+}

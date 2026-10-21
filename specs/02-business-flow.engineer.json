@@ -1,0 +1,356 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "Albireo 端到端業務流程（工程師版）",
+    "output": "engineer/02-business-flow.html",
+    "locale": "zh-TW",
+    "quality_profile": "showcase",
+    "legend": {
+      "entries": {
+        "security": {
+          "label": "營運操作"
+        },
+        "backend": {
+          "label": "主辦單位操作"
+        },
+        "frontend": {
+          "label": "參展單位操作"
+        },
+        "external": {
+          "label": "AI 服務（OpenRouter）"
+        }
+      }
+    },
+    "views": [
+      {
+        "id": "onboarding",
+        "label": "開通與入駐",
+        "focus": [
+          "op_onboard",
+          "org_rbac",
+          "ex_register",
+          "org_review_exh",
+          "ex_invite"
+        ],
+        "note": "OrganizerAdministratorService 建管理者寄邀請信；ExhibitorReviewService 決定參展單位能否登入。"
+      },
+      {
+        "id": "setup_apply",
+        "label": "活動設定與報名",
+        "focus": [
+          "org_rbac",
+          "org_create",
+          "ex_invite",
+          "ex_apply",
+          "org_review_app"
+        ],
+        "note": "報名只在 Applying 階段；核可時 AssignCodeAsync 依活動格式配發報名編號。"
+      },
+      {
+        "id": "mating",
+        "label": "互選與 AI",
+        "focus": [
+          "org_review_app",
+          "ex_mate",
+          "ai_score"
+        ],
+        "note": "MatchingMateService 只開放已核可報名，在 Mating 階段整批取代志願序。"
+      },
+      {
+        "id": "scheduling",
+        "label": "排程與公布",
+        "focus": [
+          "org_review_app",
+          "ex_mate",
+          "org_schedule",
+          "ex_view"
+        ],
+        "note": "時程表一建立就鎖住互選與時段；Published 且 ResultPublished 才給參展單位看。"
+      }
+    ]
+  },
+  "lanes": [
+    {
+      "id": "operator",
+      "label": "營運"
+    },
+    {
+      "id": "organizer",
+      "label": "主辦單位"
+    },
+    {
+      "id": "exhibitor",
+      "label": "參展單位"
+    },
+    {
+      "id": "ai",
+      "label": "AI 服務"
+    }
+  ],
+  "phases": [
+    {
+      "id": "ph_onboard",
+      "label": "開通與入駐",
+      "fromCol": 0,
+      "toCol": 1
+    },
+    {
+      "id": "ph_setup",
+      "label": "活動設定・報名中",
+      "fromCol": 2,
+      "toCol": 3
+    },
+    {
+      "id": "ph_mate",
+      "label": "互選中",
+      "fromCol": 4,
+      "toCol": 4,
+      "variant": "emphasis"
+    },
+    {
+      "id": "ph_result",
+      "label": "互選結束→公布",
+      "fromCol": 5,
+      "toCol": 5,
+      "variant": "dashed"
+    }
+  ],
+  "groups": [
+    {
+      "id": "g_schedule",
+      "label": "時程表",
+      "lane": "organizer",
+      "fromCol": 5,
+      "toCol": 5,
+      "variant": "emphasis"
+    }
+  ],
+  "mainPath": [
+    "op_onboard",
+    "org_rbac",
+    "org_create",
+    "ex_apply",
+    "org_review_app",
+    "ex_mate",
+    "org_schedule",
+    "ex_view"
+  ],
+  "nodes": [
+    {
+      "id": "op_onboard",
+      "lane": "operator",
+      "col": 0,
+      "type": "security",
+      "label": "開通主辦單位",
+      "sublabel": "代碼・網址・首位管理者",
+      "width": 150
+    },
+    {
+      "id": "org_rbac",
+      "lane": "organizer",
+      "col": 0,
+      "type": "backend",
+      "label": "設定角色權限",
+      "sublabel": "新資源不自動授權",
+      "tag": "資源樹由營運維護",
+      "width": 150
+    },
+    {
+      "id": "org_review_exh",
+      "lane": "organizer",
+      "col": 1,
+      "type": "backend",
+      "label": "審核參展單位",
+      "sublabel": "Pending→Approved",
+      "tag": "寄審核結果通知",
+      "width": 150
+    },
+    {
+      "id": "org_create",
+      "lane": "organizer",
+      "col": 2,
+      "type": "backend",
+      "label": "建活動・切時段",
+      "sublabel": "欄位・甲乙組・容量預覽",
+      "tag": "名額・互選與場次上限",
+      "width": 150
+    },
+    {
+      "id": "org_review_app",
+      "lane": "organizer",
+      "col": 4,
+      "type": "backend",
+      "label": "審核報名",
+      "sublabel": "核可時配發編號",
+      "tag": "Reviewing→Approved",
+      "width": 150
+    },
+    {
+      "id": "org_schedule",
+      "lane": "organizer",
+      "col": 5,
+      "type": "backend",
+      "label": "排程・調整・發布",
+      "sublabel": "產生・重排・補空時段",
+      "tag": "Standard／Ai 引擎可比較",
+      "width": 150
+    },
+    {
+      "id": "ex_register",
+      "lane": "exhibitor",
+      "col": 1,
+      "type": "frontend",
+      "label": "自行註冊",
+      "sublabel": "單位＋首個帳號・開通信",
+      "width": 150
+    },
+    {
+      "id": "ex_invite",
+      "lane": "exhibitor",
+      "col": 2,
+      "type": "frontend",
+      "label": "登入・邀請同事",
+      "sublabel": "單位管理者寄開通信",
+      "width": 150
+    },
+    {
+      "id": "ex_apply",
+      "lane": "exhibitor",
+      "col": 3,
+      "type": "frontend",
+      "label": "報名",
+      "sublabel": "自述與期望・額滿即停",
+      "width": 150
+    },
+    {
+      "id": "ex_mate",
+      "lane": "exhibitor",
+      "col": 4,
+      "type": "frontend",
+      "label": "互選",
+      "sublabel": "核可後排志願序",
+      "width": 140
+    },
+    {
+      "id": "ex_view",
+      "lane": "exhibitor",
+      "col": 5,
+      "type": "frontend",
+      "label": "查看個人時程表",
+      "sublabel": "已發布且到公布時間",
+      "width": 150
+    },
+    {
+      "id": "ai_score",
+      "lane": "ai",
+      "col": 4,
+      "type": "external",
+      "label": "速配度與推薦理由",
+      "sublabel": "決策＋語言模型・SSE",
+      "width": 150
+    }
+  ],
+  "edges": [
+    {
+      "id": "e_open_admin",
+      "from": "op_onboard",
+      "to": "org_rbac",
+      "label": "邀請信"
+    },
+    {
+      "id": "e_rbac_create",
+      "from": "org_rbac",
+      "to": "org_create",
+      "fromSide": "top",
+      "toSide": "top"
+    },
+    {
+      "id": "e_register_review",
+      "from": "ex_register",
+      "to": "org_review_exh",
+      "label": "送審",
+      "labelDx": 30
+    },
+    {
+      "id": "e_register_invite",
+      "from": "ex_register",
+      "to": "ex_invite",
+      "label": "核准後登入"
+    },
+    {
+      "id": "e_create_apply",
+      "from": "org_create",
+      "to": "ex_apply",
+      "label": "設為顯示"
+    },
+    {
+      "id": "e_invite_apply",
+      "from": "ex_invite",
+      "to": "ex_apply",
+      "label": "報名期間"
+    },
+    {
+      "id": "e_apply_review",
+      "from": "ex_apply",
+      "to": "org_review_app",
+      "label": "送出・審核中"
+    },
+    {
+      "id": "e_review_mate",
+      "from": "org_review_app",
+      "to": "ex_mate"
+    },
+    {
+      "id": "e_ai_mate",
+      "from": "ai_score",
+      "to": "ex_mate"
+    },
+    {
+      "id": "e_review_schedule",
+      "from": "org_review_app",
+      "to": "org_schedule",
+      "label": "互選截止後"
+    },
+    {
+      "id": "e_mate_schedule",
+      "from": "ex_mate",
+      "to": "org_schedule",
+      "label": "志願序"
+    },
+    {
+      "id": "e_schedule_view",
+      "from": "org_schedule",
+      "to": "ex_view"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "活動六階段",
+      "items": [
+        "MatchingPhaseResolver 依伺服器 UTC 時間算出，不存資料庫",
+        "未開放報名→報名中→報名結束→互選中→互選結束→結果已公布",
+        "報名只在報名中；互選只在互選中，且限已核可報名"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "鎖定與閘門",
+      "items": [
+        "時程表建立後鎖住互選與時段，捨棄草稿才解鎖",
+        "已發布不能捨棄或全部重排，可只補空時段",
+        "參展單位看時程表：Published 且到 MateResultAt"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "排程與入駐規則",
+      "items": [
+        "全部重排保留鎖定與手動會談；兩引擎可同種子比較",
+        "參展單位登入：帳號已開通且單位 Approved",
+        "報名改判非核可：同一交易清掉互選與會談"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,288 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Albireo AI 推薦理由串流（工程師版）",
+    "output": "engineer/09-ai-reason-stream.html",
+    "locale": "zh-TW",
+    "quality_profile": "showcase",
+    "column_fit": "spread",
+    "viewBox": [
+      1080,
+      574
+    ],
+    "views": [
+      {
+        "id": "precheck",
+        "label": "前提與快取",
+        "focus": [
+          "web",
+          "api",
+          "svc",
+          "redis",
+          "decision"
+        ],
+        "note": "先判業務互補、組出請求，再以請求雜湊查理由快取；命中只回 done。"
+      },
+      {
+        "id": "streaming",
+        "label": "串流撰寫",
+        "focus": [
+          "svc",
+          "llm",
+          "api",
+          "web"
+        ],
+        "note": "語言模型邊寫邊送，後端轉成 event: delta，前端逐段顯示。"
+      },
+      {
+        "id": "finalize",
+        "label": "定稿與回退",
+        "focus": [
+          "svc",
+          "redis",
+          "api",
+          "web"
+        ],
+        "note": "檢查通過才寫快取並定稿；不能用時 done 不帶理由，前端撤下文字。"
+      }
+    ]
+  },
+  "participants": [
+    {
+      "id": "web",
+      "type": "frontend",
+      "label": "參展單位前端",
+      "sublabel": "互選頁・fetch 讀串流"
+    },
+    {
+      "id": "api",
+      "type": "backend",
+      "label": "API.Exhibitor",
+      "sublabel": "MatchingMateController"
+    },
+    {
+      "id": "svc",
+      "type": "backend",
+      "label": "互選服務",
+      "sublabel": "MatchingMateService"
+    },
+    {
+      "id": "redis",
+      "type": "database",
+      "label": "Redis",
+      "sublabel": "matching-pair-score"
+    },
+    {
+      "id": "decision",
+      "type": "external",
+      "label": "決策模型",
+      "sublabel": "OpenRouter Decisions"
+    },
+    {
+      "id": "llm",
+      "type": "external",
+      "label": "語言模型",
+      "sublabel": "OpenRouter 串流"
+    }
+  ],
+  "segments": [
+    {
+      "from": 150,
+      "to": 284,
+      "label": "前提與業務互補"
+    },
+    {
+      "from": 290,
+      "to": 340,
+      "label": "理由快取"
+    },
+    {
+      "from": 346,
+      "to": 424,
+      "label": "串流撰寫"
+    },
+    {
+      "from": 430,
+      "to": 476,
+      "label": "定稿"
+    }
+  ],
+  "messages": [
+    {
+      "id": "get-reason",
+      "from": "web",
+      "to": "api",
+      "y": 160,
+      "label": "GET …/reason?language",
+      "variant": "emphasis"
+    },
+    {
+      "id": "call-service",
+      "from": "api",
+      "to": "svc",
+      "y": 188,
+      "label": "StreamExhibitorPairReasonAsync",
+      "variant": "emphasis"
+    },
+    {
+      "id": "fit-cache",
+      "from": "svc",
+      "to": "redis",
+      "y": 216,
+      "label": "查 business-fit",
+      "variant": "default"
+    },
+    {
+      "id": "ask-fit",
+      "from": "svc",
+      "to": "decision",
+      "y": 244,
+      "label": "未命中才問",
+      "variant": "dashed"
+    },
+    {
+      "id": "fit-level",
+      "from": "decision",
+      "to": "svc",
+      "y": 272,
+      "label": "互補級別",
+      "variant": "return"
+    },
+    {
+      "id": "reason-cache",
+      "from": "svc",
+      "to": "redis",
+      "y": 300,
+      "label": "查 reason（請求雜湊）",
+      "variant": "default"
+    },
+    {
+      "id": "reason-hit",
+      "from": "redis",
+      "to": "svc",
+      "y": 328,
+      "label": "命中：直接 done",
+      "variant": "return"
+    },
+    {
+      "id": "open-stream",
+      "from": "svc",
+      "to": "llm",
+      "y": 356,
+      "label": "提示詞＋事實 JSON",
+      "variant": "emphasis"
+    },
+    {
+      "id": "text-chunk",
+      "from": "llm",
+      "to": "svc",
+      "y": 384,
+      "label": "文字片段",
+      "variant": "return"
+    },
+    {
+      "id": "sse-delta",
+      "from": "api",
+      "to": "web",
+      "y": 412,
+      "label": "event: delta（逐段顯示）",
+      "variant": "emphasis"
+    },
+    {
+      "id": "save-reason",
+      "from": "svc",
+      "to": "redis",
+      "y": 440,
+      "label": "通過才寫入 30 天",
+      "variant": "dashed"
+    },
+    {
+      "id": "sse-done",
+      "from": "api",
+      "to": "web",
+      "y": 468,
+      "label": "event: done（定稿或撤下）",
+      "variant": "emphasis"
+    }
+  ],
+  "activations": [
+    {
+      "participant": "web",
+      "from": 156,
+      "to": 474,
+      "type": "frontend"
+    },
+    {
+      "participant": "api",
+      "from": 160,
+      "to": 474,
+      "type": "backend"
+    },
+    {
+      "participant": "svc",
+      "from": 188,
+      "to": 446,
+      "type": "backend"
+    },
+    {
+      "participant": "redis",
+      "from": 211,
+      "to": 222,
+      "type": "database"
+    },
+    {
+      "participant": "decision",
+      "from": 239,
+      "to": 278,
+      "type": "external"
+    },
+    {
+      "participant": "redis",
+      "from": 295,
+      "to": 334,
+      "type": "database"
+    },
+    {
+      "participant": "llm",
+      "from": 351,
+      "to": 390,
+      "type": "external"
+    },
+    {
+      "participant": "redis",
+      "from": 435,
+      "to": 446,
+      "type": "database"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "事件格式",
+      "items": [
+        "200 為 text/event-stream：零到多個 delta，最後一定一個 done（text、isReasonAvailable）",
+        "前提不符回 JSON：400 語系、404 對象、409 互選未開始",
+        "EventSource 帶不了 Authorization，改用 axios fetch adapter 讀串流"
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "提示詞與快取",
+      "items": [
+        "系統提示：角色語氣（主辦可設）→ 事實規則 → 額外要求 → 不提分數 → 句數 → 語系",
+        "長度：短 1–2 句／1000 token、中 3–4／1500、長 5–6／2000",
+        "鍵 matching-pair-score:{活動}:reason:{請求 SHA-256}，中英文各一鍵，30 天"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "失敗與中斷",
+      "items": [
+        "任何失敗都以不帶理由的 done 收尾，前端撤下文字改列相符條件",
+        "截斷、空白、夾雜他語或自我更正：不定稿、不寫快取、記 Warning",
+        "逾時後端 30 秒、前端 120 秒；離開頁面即中斷；主辦端有同樣的串流端點"
+      ]
+    }
+  ]
+}

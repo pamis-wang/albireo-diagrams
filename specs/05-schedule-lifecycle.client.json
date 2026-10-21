@@ -1,0 +1,178 @@
+{
+  "schema_version": 3,
+  "diagram_type": "lifecycle",
+  "meta": {
+    "title": "洽談時程表的生命週期",
+    "output": "client/05-schedule-lifecycle.html",
+    "locale": "zh-TW",
+    "quality_profile": "showcase"
+  },
+  "mainPath": [
+    "none",
+    "gate",
+    "draft",
+    "published",
+    "visible"
+  ],
+  "states": [
+    {
+      "id": "none",
+      "type": "start",
+      "label": "未產生",
+      "sublabel": "還沒有時程表",
+      "step": "01",
+      "tag": "起點"
+    },
+    {
+      "id": "gate",
+      "type": "decision",
+      "label": "互選截止了嗎？",
+      "sublabel": "截止後才能排程",
+      "step": "02",
+      "tag": "檢查"
+    },
+    {
+      "id": "draft",
+      "type": "active",
+      "label": "草稿",
+      "sublabel": "只有主辦單位看得到",
+      "step": "03",
+      "tag": "可反覆調整"
+    },
+    {
+      "id": "published",
+      "type": "waiting",
+      "label": "已發布",
+      "sublabel": "等結果公布時間",
+      "step": "04",
+      "tag": "已定案"
+    },
+    {
+      "id": "visible",
+      "type": "success",
+      "label": "參展單位看得到",
+      "sublabel": "查看自己的洽談時程",
+      "step": "05",
+      "tag": "公布"
+    },
+    {
+      "id": "rerun",
+      "type": "active",
+      "label": "草稿期調整",
+      "sublabel": "重排・補空檔・逐場調整",
+      "tag": "草稿期間"
+    },
+    {
+      "id": "fill",
+      "type": "active",
+      "label": "補空檔・逐場調整",
+      "sublabel": "已排的會談不動",
+      "tag": "發布之後"
+    },
+    {
+      "id": "discard",
+      "type": "neutral",
+      "label": "捨棄草稿",
+      "sublabel": "刪除會談・重新開放互選",
+      "tag": "重新來過"
+    }
+  ],
+  "transitions": [
+    {
+      "id": "t-start",
+      "from": "none",
+      "to": "gate",
+      "label": "開始排程"
+    },
+    {
+      "id": "t-pass",
+      "from": "gate",
+      "to": "draft",
+      "label": "已截止"
+    },
+    {
+      "id": "t-block",
+      "from": "gate",
+      "to": "none",
+      "label": "未截止",
+      "variant": "security"
+    },
+    {
+      "id": "t-publish",
+      "from": "draft",
+      "to": "published",
+      "label": "發布"
+    },
+    {
+      "id": "t-visible",
+      "from": "published",
+      "to": "visible",
+      "label": "到公布時間"
+    },
+    {
+      "id": "t-rerun",
+      "from": "draft",
+      "to": "rerun",
+      "label": "排程"
+    },
+    {
+      "id": "t-rerun-back",
+      "from": "rerun",
+      "to": "draft",
+      "variant": "emphasis"
+    },
+    {
+      "id": "t-fill",
+      "from": "published",
+      "to": "fill",
+      "label": "補約"
+    },
+    {
+      "id": "t-fill-back",
+      "from": "fill",
+      "to": "published",
+      "variant": "emphasis"
+    },
+    {
+      "id": "t-discard",
+      "from": "draft",
+      "to": "discard",
+      "label": "捨棄",
+      "variant": "security"
+    },
+    {
+      "id": "t-discard-reset",
+      "from": "discard",
+      "to": "none",
+      "label": "重新開始"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "amber",
+      "title": "為什麼會鎖定",
+      "items": [
+        "有時程表後，互選與時段都不能再改",
+        "捨棄草稿才會重新開放"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "發布前後的差別",
+      "items": [
+        "草稿：可整份重排、補空檔或捨棄",
+        "發布後：只能補空檔與逐場調整",
+        "排程與調整不會改變時程表狀態"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "參展單位何時看得到",
+      "items": [
+        "報名已核可",
+        "時程表已發布",
+        "已到結果公布時間"
+      ]
+    }
+  ]
+}

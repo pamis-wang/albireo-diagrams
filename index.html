@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Albireo 架構圖組</title>
+<style>
+  :root {
+    --bg: #f6f7f9;
+    --surface: #ffffff;
+    --text: #1d2330;
+    --muted: #5d6677;
+    --border: #dfe3ea;
+    --accent: #2457c5;
+    --tag-bg: #eef2fb;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #12151b;
+      --surface: #1b1f27;
+      --text: #e6e9ef;
+      --muted: #9aa3b2;
+      --border: #2d333e;
+      --accent: #7ea2ff;
+      --tag-bg: #232a38;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 15px/1.6 system-ui, -apple-system, "Segoe UI", "Microsoft JhengHei", "PingFang TC", sans-serif;
+  }
+  main { max-width: 960px; margin: 0 auto; padding: 40px 16px 64px; }
+  h1 { font-size: 26px; margin: 0 0 8px; }
+  p.lead { color: var(--muted); margin: 0 0 28px; }
+  h2 { font-size: 16px; margin: 32px 0 12px; color: var(--muted); font-weight: 600; }
+  table { width: 100%; border-collapse: collapse; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  th, td { text-align: left; padding: 12px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  th { font-size: 13px; color: var(--muted); font-weight: 600; background: var(--tag-bg); }
+  td.no { color: var(--muted); width: 44px; font-variant-numeric: tabular-nums; }
+  td.type code { background: var(--tag-bg); padding: 2px 6px; border-radius: 4px; font-size: 12px; }
+  .desc { color: var(--muted); font-size: 13px; }
+  a { color: var(--accent); text-decoration: none; font-weight: 600; }
+  a:hover { text-decoration: underline; }
+  .na { color: var(--muted); font-size: 13px; }
+  @media (max-width: 640px) {
+    td.type, th.type { display: none; }
+    th, td { padding: 10px; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <h1>Albireo 架構圖組</h1>
+  <p class="lead">四個專案（albireo-operator-frontend、albireo-organizer-frontend、albireo-exhibitor-frontend、AlbireoBackend）的架構、業務流程與配對演算規則。每張圖分工程師版與客戶版；部署與後端分層只有工程師版。</p>
+
+  <table>
+    <thead>
+      <tr><th>#</th><th>圖</th><th class="type">類型</th><th>工程師版</th><th>客戶版</th></tr>
+    </thead>
+    <tbody>
+      <tr><td class="no">01</td><td>系統架構與專案關係<div class="desc">三端前端、API 與 MCP 主機、外部服務、多租戶與權杖隔離</div></td><td class="type"><code>architecture</code></td><td><a href="engineer/01-system-architecture.html">開啟</a></td><td><a href="client/01-system-architecture.html">開啟</a></td></tr>
+      <tr><td class="no">02</td><td>端到端業務流程<div class="desc">開通主辦單位、參展單位入駐、活動設定、報名、互選、排程、發布</div></td><td class="type"><code>workflow</code></td><td><a href="engineer/02-business-flow.html">開啟</a></td><td><a href="client/02-business-flow.html">開啟</a></td></tr>
+      <tr><td class="no">03</td><td>速配度計算<div class="desc">對方可見資料、各面向計分、決策模型與快取、加權平均</div></td><td class="type"><code>dataflow</code></td><td><a href="engineer/03-pair-score.html">開啟</a></td><td><a href="client/03-pair-score.html">開啟</a></td></tr>
+      <tr><td class="no">04</td><td>排程演算法<div class="desc">候選配對、兩個引擎的分層、輪流挑、沒排到的原因</div></td><td class="type"><code>workflow</code></td><td><a href="engineer/04-scheduler.html">開啟</a></td><td><a href="client/04-scheduler.html">開啟</a></td></tr>
+      <tr><td class="no">05</td><td>時程表狀態<div class="desc">未產生、草稿、已發布與執行模式、互選與時段鎖定</div></td><td class="type"><code>lifecycle</code></td><td><a href="engineer/05-schedule-lifecycle.html">開啟</a></td><td><a href="client/05-schedule-lifecycle.html">開啟</a></td></tr>
+      <tr><td class="no">06</td><td>報名狀態<div class="desc">審核中、已核可、不核可、已取消與名額</div></td><td class="type"><code>lifecycle</code></td><td><a href="engineer/06-application-lifecycle.html">開啟</a></td><td><a href="client/06-application-lifecycle.html">開啟</a></td></tr>
+      <tr><td class="no">07</td><td>參展單位審核狀態<div class="desc">待審核、已核准、未通過、已停權</div></td><td class="type"><code>lifecycle</code></td><td><a href="engineer/07-exhibitor-review-lifecycle.html">開啟</a></td><td><a href="client/07-exhibitor-review-lifecycle.html">開啟</a></td></tr>
+      <tr><td class="no">08</td><td>多租戶隔離<div class="desc">主辦代碼、權杖、主辦單位範圍與全域篩選</div></td><td class="type"><code>sequence</code></td><td><a href="engineer/08-tenant-isolation.html">開啟</a></td><td><a href="client/08-tenant-isolation.html">開啟</a></td></tr>
+      <tr><td class="no">09</td><td>AI 推薦理由串流<div class="desc">互選頁點開候選對象到逐段顯示推薦理由</div></td><td class="type"><code>sequence</code></td><td><a href="engineer/09-ai-reason-stream.html">開啟</a></td><td><a href="client/09-ai-reason-stream.html">開啟</a></td></tr>
+      <tr><td class="no">10</td><td>部署拓撲<div class="desc">反向代理、容器與宿主機埠號、建構與部署</div></td><td class="type"><code>architecture</code></td><td><a href="engineer/10-deployment-topology.html">開啟</a></td><td><span class="na">—</span></td></tr>
+      <tr><td class="no">11</td><td>後端分層相依<div class="desc">API、Services、Domain、Repositories、Infrastructure 的相依方向</div></td><td class="type"><code>architecture</code></td><td><a href="engineer/11-backend-layers.html">開啟</a></td><td><span class="na">—</span></td></tr>
+    </tbody>
+  </table>
+</main>
+</body>
+</html>

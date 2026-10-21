@@ -1,0 +1,295 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "排程演算法（客戶版）",
+    "output": "client/04-scheduler.html",
+    "locale": "zh-TW",
+    "quality_profile": "showcase",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "security": {
+          "label": "檢查"
+        },
+        "backend": {
+          "label": "排程步驟"
+        },
+        "cloud": {
+          "label": "AI 服務"
+        },
+        "database": {
+          "label": "存檔"
+        }
+      }
+    },
+    "views": [
+      {
+        "id": "by-preference",
+        "label": "依志願排程",
+        "focus": [
+          "gate",
+          "inputs",
+          "pairs",
+          "std_tier",
+          "round",
+          "result",
+          "save"
+        ],
+        "note": "只排已核可的單位；互選截止後才開始，排程時志願不會再變動。"
+      },
+      {
+        "id": "ai-engine",
+        "label": "AI 配對引擎",
+        "focus": [
+          "pairs",
+          "ai_score",
+          "ai_tier",
+          "round",
+          "ai_fail"
+        ],
+        "note": "交給 AI 的只有對方看得到的資料；只要有一組評估失敗，這次就整批不採用，不會一半 AI、一半隨機。"
+      },
+      {
+        "id": "after-run",
+        "label": "排完之後",
+        "focus": [
+          "result",
+          "save"
+        ],
+        "note": "結果先存成草稿，主辦單位可以移動、交換、鎖定會談，確認後再發布；發布後仍可補空檔。"
+      }
+    ]
+  },
+  "lanes": [
+    {
+      "id": "service",
+      "label": "排程前準備與存檔"
+    },
+    {
+      "id": "scheduler",
+      "label": "排程器"
+    },
+    {
+      "id": "ai",
+      "label": "AI 配對引擎（選用）"
+    }
+  ],
+  "phases": [
+    {
+      "id": "ph_check",
+      "label": "準備",
+      "fromCol": 0,
+      "toCol": 1
+    },
+    {
+      "id": "ph_pairs",
+      "label": "列出組合",
+      "fromCol": 2,
+      "toCol": 2
+    },
+    {
+      "id": "ph_order",
+      "label": "決定先後",
+      "fromCol": 3,
+      "toCol": 3,
+      "variant": "emphasis"
+    },
+    {
+      "id": "ph_place",
+      "label": "輪流挑",
+      "fromCol": 4,
+      "toCol": 4,
+      "variant": "emphasis"
+    },
+    {
+      "id": "ph_out",
+      "label": "結果",
+      "fromCol": 5,
+      "toCol": 5
+    }
+  ],
+  "mainPath": [
+    "gate",
+    "inputs",
+    "pairs",
+    "std_tier",
+    "round",
+    "result",
+    "save"
+  ],
+  "nodes": [
+    {
+      "id": "gate",
+      "lane": "service",
+      "col": 0,
+      "width": 140,
+      "type": "security",
+      "label": "互選截止",
+      "sublabel": "名單與志願定案"
+    },
+    {
+      "id": "inputs",
+      "lane": "service",
+      "col": 1,
+      "width": 140,
+      "type": "backend",
+      "label": "收集條件",
+      "sublabel": "已核可單位、志願、時段"
+    },
+    {
+      "id": "save",
+      "lane": "service",
+      "col": 5,
+      "width": 140,
+      "type": "database",
+      "label": "時程表草稿",
+      "sublabel": "主辦單位調整後發布"
+    },
+    {
+      "id": "pairs",
+      "lane": "scheduler",
+      "col": 2,
+      "width": 140,
+      "type": "backend",
+      "label": "列出所有組合",
+      "sublabel": "甲組 × 乙組"
+    },
+    {
+      "id": "std_tier",
+      "lane": "scheduler",
+      "col": 3,
+      "width": 140,
+      "type": "backend",
+      "label": "依志願排先後",
+      "sublabel": "互選 → 單向 → 補空檔"
+    },
+    {
+      "id": "round",
+      "lane": "scheduler",
+      "col": 4,
+      "width": 140,
+      "type": "backend",
+      "label": "公平輪流挑",
+      "sublabel": "放進雙方最早空檔"
+    },
+    {
+      "id": "result",
+      "lane": "scheduler",
+      "col": 5,
+      "width": 140,
+      "type": "backend",
+      "label": "說明結果",
+      "sublabel": "沒排到也告訴你原因"
+    },
+    {
+      "id": "ai_fail",
+      "lane": "ai",
+      "col": 1,
+      "width": 140,
+      "type": "security",
+      "label": "整批不採用",
+      "sublabel": "原排程引擎照常可用"
+    },
+    {
+      "id": "ai_score",
+      "lane": "ai",
+      "col": 2,
+      "width": 140,
+      "type": "cloud",
+      "label": "AI 評估速配度",
+      "sublabel": "以雙方較低者為準"
+    },
+    {
+      "id": "ai_tier",
+      "lane": "ai",
+      "col": 3,
+      "width": 140,
+      "type": "backend",
+      "label": "速配度＋志願",
+      "sublabel": "綜合排先後"
+    }
+  ],
+  "edges": [
+    {
+      "from": "gate",
+      "to": "inputs",
+      "variant": "emphasis"
+    },
+    {
+      "from": "inputs",
+      "to": "pairs",
+      "variant": "emphasis"
+    },
+    {
+      "from": "pairs",
+      "to": "std_tier",
+      "label": "原排程引擎",
+      "variant": "emphasis"
+    },
+    {
+      "from": "std_tier",
+      "to": "round",
+      "variant": "emphasis"
+    },
+    {
+      "from": "round",
+      "to": "result",
+      "label": "全部排完",
+      "variant": "emphasis"
+    },
+    {
+      "from": "result",
+      "to": "save",
+      "variant": "emphasis"
+    },
+    {
+      "from": "pairs",
+      "to": "ai_score"
+    },
+    {
+      "from": "ai_score",
+      "to": "ai_tier"
+    },
+    {
+      "from": "ai_tier",
+      "to": "round"
+    },
+    {
+      "from": "ai_score",
+      "to": "ai_fail",
+      "label": "失敗或逾時",
+      "variant": "security",
+      "role": "error"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "排程原則",
+      "items": [
+        "先排雙方都想見的，再排單方想見的，最後才補空檔",
+        "可以指定單方想見時哪一組優先，也可以關閉補空檔",
+        "AI 配對引擎：速配度很高的單方意願，可以排在速配度低的互選前面"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "公平又不衝突",
+      "items": [
+        "輪流挑：每一輪每個單位最多挑一場，場次少的先挑，避免熱門單位被一家搶光",
+        "同一時段一人只有一場，同一組合只見一次",
+        "不超過每人場次上限"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "可重現、可解釋",
+      "items": [
+        "同樣的設定排兩次，結果一模一樣",
+        "沒排到會告訴你原因：自己排滿、對方排滿或時段對不上",
+        "兩個引擎可以先比較結果再決定，比較不會改動時程表"
+      ]
+    }
+  ]
+}

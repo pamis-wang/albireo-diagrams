@@ -1,0 +1,342 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Albireo 多租戶隔離",
+    "output": "engineer/08-tenant-isolation.html",
+    "locale": "zh-TW",
+    "quality_profile": "showcase",
+    "column_fit": "spread",
+    "viewBox": [
+      1280,
+      772
+    ],
+    "views": [
+      {
+        "id": "before-login",
+        "label": "登入前：路由代碼",
+        "focus": [
+          "web",
+          "api",
+          "scope"
+        ],
+        "note": "登入、註冊、重設密碼以路由的 {organizerCode} 決定主辦單位，不存在回 404、停用回 403。"
+      },
+      {
+        "id": "authorized-query",
+        "label": "登入後查詢",
+        "focus": [
+          "api",
+          "jwt",
+          "scope",
+          "authz",
+          "redis",
+          "ctx",
+          "pg"
+        ],
+        "note": "權杖的 organizer_id 決定範圍，主辦端再查資源權限，最後由全域篩選只取本主辦單位的資料。"
+      },
+      {
+        "id": "write-stamp",
+        "label": "寫入",
+        "focus": [
+          "api",
+          "ctx"
+        ],
+        "note": "SaveChanges 自動填 organizer_id；沒有範圍或寫到別家直接丟例外。"
+      },
+      {
+        "id": "operator-bypass",
+        "label": "營運端與明確略過",
+        "focus": [
+          "web",
+          "api",
+          "scope",
+          "ctx"
+        ],
+        "note": "營運端以路由 {organizerId} 代入主辦單位；只有少數方法明確略過篩選。"
+      }
+    ]
+  },
+  "participants": [
+    {
+      "id": "web",
+      "type": "frontend",
+      "label": "三個前端"
+    },
+    {
+      "id": "api",
+      "type": "backend",
+      "label": "API 主機"
+    },
+    {
+      "id": "jwt",
+      "type": "security",
+      "label": "JWT 驗證"
+    },
+    {
+      "id": "scope",
+      "type": "security",
+      "label": "OrganizerScope"
+    },
+    {
+      "id": "authz",
+      "type": "security",
+      "label": "資源權限檢查"
+    },
+    {
+      "id": "redis",
+      "type": "database",
+      "label": "Redis 權限快照"
+    },
+    {
+      "id": "ctx",
+      "type": "backend",
+      "label": "RdbmsContext"
+    },
+    {
+      "id": "pg",
+      "type": "database",
+      "label": "PostgreSQL"
+    }
+  ],
+  "segments": [
+    {
+      "from": 150,
+      "to": 226,
+      "label": "① 登入前"
+    },
+    {
+      "from": 232,
+      "to": 534,
+      "label": "② 登入後查詢"
+    },
+    {
+      "from": 540,
+      "to": 590,
+      "label": "③ 寫入"
+    },
+    {
+      "from": 596,
+      "to": 674,
+      "label": "④ 營運端"
+    }
+  ],
+  "messages": [
+    {
+      "id": "login-request",
+      "from": "web",
+      "to": "api",
+      "y": 160,
+      "label": "POST …/{organizerCode}/auth/login",
+      "variant": "emphasis"
+    },
+    {
+      "id": "route-code",
+      "from": "api",
+      "to": "scope",
+      "y": 188,
+      "label": "以路由代碼查啟用中的主辦單位"
+    },
+    {
+      "id": "lookup-result",
+      "from": "scope",
+      "to": "api",
+      "y": 216,
+      "label": "不存在 404／已停用 403",
+      "variant": "return"
+    },
+    {
+      "id": "bearer-request",
+      "from": "web",
+      "to": "api",
+      "y": 244,
+      "label": "GET /api/matchings（Bearer）",
+      "variant": "emphasis"
+    },
+    {
+      "id": "verify-jwt",
+      "from": "api",
+      "to": "jwt",
+      "y": 272,
+      "label": "驗證簽發者與簽章",
+      "variant": "security"
+    },
+    {
+      "id": "jwt-claims",
+      "from": "jwt",
+      "to": "api",
+      "y": 300,
+      "label": "organizer_id、sub、active_role_ids",
+      "variant": "return"
+    },
+    {
+      "id": "claim-scope",
+      "from": "api",
+      "to": "scope",
+      "y": 328,
+      "label": "取 organizer_id claim",
+      "variant": "security"
+    },
+    {
+      "id": "scope-set",
+      "from": "scope",
+      "to": "api",
+      "y": 356,
+      "label": "與路由代碼不一致 403；否則設範圍",
+      "variant": "return"
+    },
+    {
+      "id": "require-permission",
+      "from": "api",
+      "to": "authz",
+      "y": 384,
+      "label": "[RequirePermission] 資源＋動作",
+      "variant": "security"
+    },
+    {
+      "id": "read-snapshot",
+      "from": "authz",
+      "to": "redis",
+      "y": 412,
+      "label": "讀用戶與角色快照"
+    },
+    {
+      "id": "permission-result",
+      "from": "authz",
+      "to": "api",
+      "y": 440,
+      "label": "無權限 403；查詢失敗 500",
+      "variant": "return"
+    },
+    {
+      "id": "create-context",
+      "from": "api",
+      "to": "ctx",
+      "y": 468,
+      "label": "Repository 建 DbContext，代入範圍"
+    },
+    {
+      "id": "filtered-query",
+      "from": "ctx",
+      "to": "pg",
+      "y": 496,
+      "label": "WHERE organizer_id = 範圍",
+      "variant": "emphasis"
+    },
+    {
+      "id": "filtered-rows",
+      "from": "pg",
+      "to": "api",
+      "y": 524,
+      "label": "只回本主辦單位；範圍為 null 時 0 筆",
+      "variant": "return"
+    },
+    {
+      "id": "save-changes",
+      "from": "api",
+      "to": "ctx",
+      "y": 552,
+      "label": "SaveChangesAsync：新增自動填 organizer_id",
+      "variant": "emphasis"
+    },
+    {
+      "id": "stamp-reject",
+      "from": "ctx",
+      "to": "api",
+      "y": 580,
+      "label": "沒有範圍或寫到別家 → InvalidOperationException",
+      "variant": "return"
+    },
+    {
+      "id": "operator-request",
+      "from": "web",
+      "to": "api",
+      "y": 608,
+      "label": "營運：/api/organizers/{organizerId}/…",
+      "variant": "emphasis"
+    },
+    {
+      "id": "route-id-scope",
+      "from": "api",
+      "to": "scope",
+      "y": 636,
+      "label": "RouteOrganizerIdScopeMiddleware 設範圍"
+    },
+    {
+      "id": "ignore-filter",
+      "from": "api",
+      "to": "ctx",
+      "y": 664,
+      "label": "少數方法明確 IgnoreQueryFilters",
+      "variant": "dashed"
+    }
+  ],
+  "activations": [
+    {
+      "participant": "api",
+      "from": 160,
+      "to": 664,
+      "type": "backend"
+    },
+    {
+      "participant": "scope",
+      "from": 188,
+      "to": 216,
+      "type": "security"
+    },
+    {
+      "participant": "jwt",
+      "from": 272,
+      "to": 300,
+      "type": "security"
+    },
+    {
+      "participant": "scope",
+      "from": 328,
+      "to": 356,
+      "type": "security"
+    },
+    {
+      "participant": "authz",
+      "from": 384,
+      "to": 440,
+      "type": "security"
+    },
+    {
+      "participant": "ctx",
+      "from": 468,
+      "to": 580,
+      "type": "backend"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "前端守衛與權杖",
+      "items": [
+        "代碼不存在或停用：導向 404 頁",
+        "網址代碼與登入時不同：清除登入",
+        "三端簽發者各自獨立，權杖不能跨端"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "預設拒絕",
+      "items": [
+        "範圍存在 AsyncLocal，逐請求設定",
+        "主辦單位的資料表一律掛 Organizer 篩選",
+        "範圍為 null：什麼都查不到"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "權限與例外",
+      "items": [
+        "資源權限只在主辦端；改權限即刪快照",
+        "明確略過：首位管理者、資源樹、API 金鑰",
+        "MCP 主機以 API 金鑰換出同樣的 claim"
+      ]
+    }
+  ]
+}

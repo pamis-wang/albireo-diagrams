@@ -1,0 +1,168 @@
+{
+  "schema_version": 3,
+  "diagram_type": "lifecycle",
+  "meta": {
+    "title": "報名生命週期（工程師版）",
+    "output": "engineer/06-application-lifecycle.html",
+    "locale": "zh-TW",
+    "quality_profile": "showcase"
+  },
+  "mainPath": [
+    "none",
+    "gate",
+    "reviewing",
+    "approved",
+    "joined"
+  ],
+  "states": [
+    {
+      "id": "none",
+      "type": "start",
+      "label": "未報名",
+      "sublabel": "查無紀錄・不入庫",
+      "step": "01",
+      "tag": "not_registered"
+    },
+    {
+      "id": "gate",
+      "type": "decision",
+      "label": "報名檢查",
+      "sublabel": "Applying・未重複・名額",
+      "step": "02",
+      "tag": "不符回 409"
+    },
+    {
+      "id": "reviewing",
+      "type": "waiting",
+      "label": "審核中",
+      "sublabel": "佔名額・可改可取消",
+      "step": "03",
+      "tag": "reviewing"
+    },
+    {
+      "id": "approved",
+      "type": "active",
+      "label": "已核可",
+      "sublabel": "配發報名編號",
+      "step": "04",
+      "tag": "approved"
+    },
+    {
+      "id": "joined",
+      "type": "success",
+      "label": "進入媒合",
+      "sublabel": "互選・排程・看結果",
+      "step": "05",
+      "tag": "phase ≥ Mating"
+    },
+    {
+      "id": "rejected",
+      "type": "failure",
+      "label": "不核可",
+      "sublabel": "不佔名額・主辦可改判",
+      "tag": "rejected"
+    },
+    {
+      "id": "canceled",
+      "type": "failure",
+      "label": "已取消",
+      "sublabel": "不能自行重新報名",
+      "tag": "canceled"
+    }
+  ],
+  "transitions": [
+    {
+      "id": "t-submit",
+      "from": "none",
+      "to": "gate",
+      "label": "送出報名"
+    },
+    {
+      "id": "t-pass",
+      "from": "gate",
+      "to": "reviewing",
+      "label": "通過檢查"
+    },
+    {
+      "id": "t-block",
+      "from": "gate",
+      "to": "none",
+      "label": "不符 409",
+      "variant": "security"
+    },
+    {
+      "id": "t-approve",
+      "from": "reviewing",
+      "to": "approved",
+      "label": "主辦核可"
+    },
+    {
+      "id": "t-join",
+      "from": "approved",
+      "to": "joined",
+      "label": "進入互選期"
+    },
+    {
+      "id": "t-self-cancel",
+      "from": "reviewing",
+      "to": "canceled",
+      "label": "參展單位自行取消"
+    },
+    {
+      "id": "t-restore",
+      "from": "canceled",
+      "to": "reviewing",
+      "label": "主辦改回審核中",
+      "variant": "emphasis"
+    },
+    {
+      "id": "t-reject",
+      "from": "reviewing",
+      "to": "rejected",
+      "label": "主辦不核可",
+      "variant": "security"
+    },
+    {
+      "id": "t-overturn",
+      "from": "rejected",
+      "to": "approved",
+      "label": "改判核可",
+      "variant": "emphasis"
+    },
+    {
+      "id": "t-revoke",
+      "from": "approved",
+      "to": "rejected",
+      "label": "清除互選與會談",
+      "variant": "security"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "amber",
+      "title": "名額",
+      "items": [
+        "StopApplyWhenFull 且名額 > 0 才擋",
+        "reviewing＋approved 佔名額",
+        "rejected／canceled 不佔名額"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "參展單位",
+      "items": [
+        "報名、修改只在 Applying",
+        "修改與取消限 reviewing"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "主辦改判（ReviewApplication）",
+      "items": [
+        "四種狀態可任意互改",
+        "改成非 approved 時同交易刪互選與會談",
+        "已發布且仍有會談時回 409"
+      ]
+    }
+  ]
+}

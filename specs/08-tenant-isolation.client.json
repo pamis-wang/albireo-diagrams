@@ -1,0 +1,289 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Albireo 資料隔離",
+    "output": "client/08-tenant-isolation.html",
+    "locale": "zh-TW",
+    "quality_profile": "showcase",
+    "column_fit": "spread",
+    "viewBox": [
+      1200,
+      698
+    ],
+    "views": [
+      {
+        "id": "before-login",
+        "label": "登入前：認網址代碼",
+        "focus": [
+          "user",
+          "platform",
+          "scope"
+        ],
+        "note": "每家主辦單位有自己的網址代碼，代碼不存在或已停用就無法進入。"
+      },
+      {
+        "id": "every-request",
+        "label": "每次請求都檢查",
+        "focus": [
+          "platform",
+          "identity",
+          "scope",
+          "perm"
+        ],
+        "note": "登入憑證、所屬主辦單位、角色權限，三道檢查都過才會碰到資料。"
+      },
+      {
+        "id": "data-boundary",
+        "label": "資料只取自己的",
+        "focus": [
+          "platform",
+          "data"
+        ],
+        "note": "查詢只取本主辦單位的資料，寫入自動標記所屬主辦單位，寫到別家直接擋下。"
+      }
+    ]
+  },
+  "participants": [
+    {
+      "id": "user",
+      "type": "frontend",
+      "label": "使用者瀏覽器"
+    },
+    {
+      "id": "platform",
+      "type": "backend",
+      "label": "Albireo 平台"
+    },
+    {
+      "id": "identity",
+      "type": "security",
+      "label": "登入憑證"
+    },
+    {
+      "id": "scope",
+      "type": "security",
+      "label": "主辦單位範圍"
+    },
+    {
+      "id": "perm",
+      "type": "security",
+      "label": "角色權限"
+    },
+    {
+      "id": "data",
+      "type": "database",
+      "label": "資料庫"
+    }
+  ],
+  "segments": [
+    {
+      "from": 150,
+      "to": 226,
+      "label": "① 登入前"
+    },
+    {
+      "from": 232,
+      "to": 506,
+      "label": "② 登入後查詢"
+    },
+    {
+      "from": 512,
+      "to": 562,
+      "label": "③ 寫入"
+    },
+    {
+      "from": 568,
+      "to": 600,
+      "label": "④ 平台營運"
+    }
+  ],
+  "messages": [
+    {
+      "id": "open-login",
+      "from": "user",
+      "to": "platform",
+      "y": 160,
+      "label": "開啟 /demo/login",
+      "variant": "emphasis"
+    },
+    {
+      "id": "check-code",
+      "from": "platform",
+      "to": "scope",
+      "y": 188,
+      "label": "依網址代碼確認主辦單位"
+    },
+    {
+      "id": "code-result",
+      "from": "scope",
+      "to": "platform",
+      "y": 216,
+      "label": "代碼不存在或已停用：無法進入",
+      "variant": "return"
+    },
+    {
+      "id": "query-request",
+      "from": "user",
+      "to": "platform",
+      "y": 244,
+      "label": "查詢媒合活動",
+      "variant": "emphasis"
+    },
+    {
+      "id": "verify-token",
+      "from": "platform",
+      "to": "identity",
+      "y": 272,
+      "label": "確認憑證由本端簽發",
+      "variant": "security"
+    },
+    {
+      "id": "token-owner",
+      "from": "identity",
+      "to": "platform",
+      "y": 300,
+      "label": "憑證載明所屬主辦單位",
+      "variant": "return"
+    },
+    {
+      "id": "match-scope",
+      "from": "platform",
+      "to": "scope",
+      "y": 328,
+      "label": "比對憑證與網址的主辦單位",
+      "variant": "security"
+    },
+    {
+      "id": "scope-result",
+      "from": "scope",
+      "to": "platform",
+      "y": 356,
+      "label": "不一致：拒絕存取",
+      "variant": "return"
+    },
+    {
+      "id": "check-role",
+      "from": "platform",
+      "to": "perm",
+      "y": 384,
+      "label": "確認角色有這項權限",
+      "variant": "security"
+    },
+    {
+      "id": "role-result",
+      "from": "perm",
+      "to": "platform",
+      "y": 412,
+      "label": "沒有權限：拒絕存取",
+      "variant": "return"
+    },
+    {
+      "id": "scoped-query",
+      "from": "platform",
+      "to": "data",
+      "y": 440,
+      "label": "只查本主辦單位的資料",
+      "variant": "emphasis"
+    },
+    {
+      "id": "scoped-rows",
+      "from": "data",
+      "to": "platform",
+      "y": 468,
+      "label": "其他主辦單位的資料一筆都不會出現",
+      "variant": "return"
+    },
+    {
+      "id": "query-response",
+      "from": "platform",
+      "to": "user",
+      "y": 496,
+      "label": "回傳結果",
+      "variant": "return"
+    },
+    {
+      "id": "stamp-write",
+      "from": "platform",
+      "to": "data",
+      "y": 524,
+      "label": "新增資料自動標記所屬主辦單位",
+      "variant": "emphasis"
+    },
+    {
+      "id": "reject-write",
+      "from": "data",
+      "to": "platform",
+      "y": 552,
+      "label": "寫到別家主辦單位：直接擋下",
+      "variant": "return"
+    },
+    {
+      "id": "operator-act",
+      "from": "platform",
+      "to": "data",
+      "y": 580,
+      "label": "平台營運人員代入指定主辦單位操作",
+      "variant": "dashed"
+    }
+  ],
+  "activations": [
+    {
+      "participant": "platform",
+      "from": 160,
+      "to": 580,
+      "type": "backend"
+    },
+    {
+      "participant": "scope",
+      "from": 188,
+      "to": 216,
+      "type": "security"
+    },
+    {
+      "participant": "identity",
+      "from": 272,
+      "to": 300,
+      "type": "security"
+    },
+    {
+      "participant": "scope",
+      "from": 328,
+      "to": 356,
+      "type": "security"
+    },
+    {
+      "participant": "perm",
+      "from": 384,
+      "to": 412,
+      "type": "security"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "各自獨立",
+      "items": [
+        "每家主辦單位有自己的網址代碼",
+        "參加兩家的活動就是兩個參展帳號",
+        "主辦、參展、營運三端登入不通用"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "預設拒絕",
+      "items": [
+        "認不出主辦單位時什麼都查不到",
+        "換到別家的網址需重新登入"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "權限可自訂",
+      "items": [
+        "主辦單位可自訂角色與功能權限",
+        "收回角色或權限立即生效"
+      ]
+    }
+  ]
+}

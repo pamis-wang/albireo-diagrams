@@ -1,0 +1,311 @@
+{
+  "schema_version": 1,
+  "diagram_type": "dataflow",
+  "meta": {
+    "title": "Albireo 速配度計算（工程師版）",
+    "output": "engineer/03-pair-score.html",
+    "locale": "zh-TW",
+    "quality_profile": "showcase",
+    "viewBox": [
+      1080,
+      540
+    ],
+    "views": [
+      {
+        "id": "privacy",
+        "label": "隱私邊界",
+        "focus": [
+          "application",
+          "schema",
+          "counterpartView"
+        ],
+        "note": "交給 AI 的上限就是對方看得到的內容：MatchingCounterpartView 先剝掉，不靠 API 層記得。"
+      },
+      {
+        "id": "dimensions",
+        "label": "逐面向計分",
+        "focus": [
+          "business",
+          "market",
+          "wants",
+          "decision",
+          "combine"
+        ],
+        "note": "每一題是一個面向，依權重加權平均；只有業務項目會呼叫外部服務。"
+      },
+      {
+        "id": "consumers",
+        "label": "三個用途",
+        "focus": [
+          "combine",
+          "mateList",
+          "aiEngine",
+          "reason"
+        ],
+        "note": "互選候選清單、AI 配對引擎與推薦理由共用同一套面向事實。"
+      }
+    ]
+  },
+  "stages": [
+    {
+      "label": "報名資料"
+    },
+    {
+      "label": "隱私過濾"
+    },
+    {
+      "label": "逐面向計分"
+    },
+    {
+      "label": "互補判斷與合成"
+    },
+    {
+      "label": "用途"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "application",
+      "type": "frontend",
+      "label": "報名填答",
+      "sublabel": "自述＋期望",
+      "stage": 0,
+      "row": 0,
+      "tag": "MatchingApplication"
+    },
+    {
+      "id": "schema",
+      "type": "backend",
+      "label": "題目設定",
+      "sublabel": "公開範圍・權重",
+      "stage": 0,
+      "row": 2,
+      "tag": "MatchingFieldSchema"
+    },
+    {
+      "id": "counterpartView",
+      "type": "security",
+      "label": "對方可見檢視",
+      "sublabel": "剝除聯絡方式與姓名職稱",
+      "stage": 1,
+      "row": 1,
+      "tag": "MatchingCounterpartView"
+    },
+    {
+      "id": "business",
+      "type": "backend",
+      "label": "業務項目",
+      "sublabel": "business_item",
+      "stage": 2,
+      "row": 0,
+      "tag": "命中期望＝1"
+    },
+    {
+      "id": "market",
+      "type": "backend",
+      "label": "經營市場",
+      "sublabel": "external_market",
+      "stage": 2,
+      "row": 1,
+      "tag": "任一命中／重疊係數"
+    },
+    {
+      "id": "wants",
+      "type": "backend",
+      "label": "其他期望題",
+      "sublabel": "單選・多選",
+      "stage": 2,
+      "row": 2,
+      "tag": "任一命中"
+    },
+    {
+      "id": "decision",
+      "type": "external",
+      "label": "決策模型",
+      "sublabel": "OpenRouter Decisions",
+      "stage": 3,
+      "row": 0,
+      "tag": "Redis 快取 30 天"
+    },
+    {
+      "id": "combine",
+      "type": "backend",
+      "label": "加權平均",
+      "sublabel": "不計0・低1・一般2・高3",
+      "stage": 3,
+      "row": 1,
+      "tag": "MatchingPairScoring"
+    },
+    {
+      "id": "mateList",
+      "type": "frontend",
+      "label": "互選候選清單",
+      "sublabel": "參展單位與後台",
+      "stage": 4,
+      "row": 0,
+      "tag": "有方向的分數"
+    },
+    {
+      "id": "aiEngine",
+      "type": "backend",
+      "label": "AI 配對引擎",
+      "sublabel": "雙向取較低者",
+      "stage": 4,
+      "row": 1,
+      "tag": "＋志願加分"
+    },
+    {
+      "id": "reason",
+      "type": "external",
+      "label": "推薦理由",
+      "sublabel": "語言模型撰寫",
+      "stage": 4,
+      "row": 2,
+      "tag": "不交分數"
+    }
+  ],
+  "flows": [
+    {
+      "id": "application-view",
+      "from": "application",
+      "to": "counterpartView",
+      "label": "完整報名",
+      "variant": "default"
+    },
+    {
+      "id": "schema-view",
+      "from": "schema",
+      "to": "counterpartView",
+      "label": "可見欄位＋權重",
+      "variant": "default"
+    },
+    {
+      "id": "view-business",
+      "from": "counterpartView",
+      "to": "business",
+      "label": "業務自述與期望",
+      "variant": "security",
+      "fromSide": "top",
+      "via": [
+        [
+          315,
+          157
+        ]
+      ]
+    },
+    {
+      "id": "view-market",
+      "from": "counterpartView",
+      "to": "market",
+      "label": "市場自述與期望",
+      "variant": "security"
+    },
+    {
+      "id": "view-wants",
+      "from": "counterpartView",
+      "to": "wants",
+      "label": "開放期望的題目",
+      "variant": "security",
+      "fromSide": "bottom",
+      "via": [
+        [
+          315,
+          385
+        ]
+      ]
+    },
+    {
+      "id": "business-decision",
+      "from": "business",
+      "to": "decision",
+      "label": "未命中才問",
+      "variant": "dashed"
+    },
+    {
+      "id": "decision-combine",
+      "from": "decision",
+      "to": "combine",
+      "label": "互補級別 0–1",
+      "variant": "default",
+      "labelAt": [
+        745,
+        214
+      ]
+    },
+    {
+      "id": "market-combine",
+      "from": "market",
+      "to": "combine",
+      "label": "0–1；沒填 0.5",
+      "variant": "emphasis"
+    },
+    {
+      "id": "wants-combine",
+      "from": "wants",
+      "to": "combine",
+      "label": "0 或 1；沒填 0.5",
+      "variant": "default",
+      "toSide": "bottom",
+      "via": [
+        [
+          745,
+          385
+        ]
+      ]
+    },
+    {
+      "id": "combine-mates",
+      "from": "combine",
+      "to": "mateList",
+      "label": "查看者→對方",
+      "variant": "emphasis"
+    },
+    {
+      "id": "combine-engine",
+      "from": "combine",
+      "to": "aiEngine",
+      "label": "雙向",
+      "variant": "emphasis",
+      "labelAt": [
+        878,
+        271
+      ]
+    },
+    {
+      "id": "combine-reason",
+      "from": "combine",
+      "to": "reason",
+      "label": "同一套面向事實",
+      "variant": "dashed"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "計分規則",
+      "items": [
+        "業務項目：命中期望直接 1；未命中問 favored_fit（最高 0.75）；沒填期望問 fit 業態互補（0–1）",
+        "經營市場：有期望看任一命中，沒期望比重疊係數（重疊數 ÷ 較少的一方）",
+        "對方沒填給 0.5；查看者自己沒得比的面向不計入；全部不計時為 null"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "快取與失敗",
+      "items": [
+        "鍵 matching-pair-score:{活動}:business-fit:{請求 SHA-256}，模型代號在鍵裡",
+        "決策模型並行上限 8；候選清單逾時 5 秒、AI 配對引擎 60 秒",
+        "任一組失敗整批不可用：候選清單照回、前端改條件比對；AI 配對引擎回錯不退回隨機（D28）"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "隱私邊界",
+      "items": [
+        "只留 IsVisibleToCounterpart 的自述；期望另看 IsFavoredVisibleToCounterpart",
+        "聯絡方式、報名編號、桌號、審核資訊、出席者姓名職稱都不送 AI",
+        "原排程引擎不接速配度；MCP 主機不給 AI Provider 金鑰"
+      ]
+    }
+  ]
+}

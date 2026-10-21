@@ -1,0 +1,297 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "排程演算法（工程師版）",
+    "output": "engineer/04-scheduler.html",
+    "locale": "zh-TW",
+    "quality_profile": "showcase",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "security": {
+          "label": "檢查與失敗"
+        },
+        "backend": {
+          "label": "排程邏輯"
+        },
+        "cloud": {
+          "label": "會呼叫外部 AI 服務"
+        },
+        "database": {
+          "label": "寫入資料庫"
+        }
+      }
+    },
+    "views": [
+      {
+        "id": "standard-path",
+        "label": "原排程引擎",
+        "focus": [
+          "gate",
+          "inputs",
+          "pairs",
+          "std_tier",
+          "round",
+          "result",
+          "save"
+        ],
+        "note": "互選截止後才能排（D18）；只取已核可報名，依報名編號固定順序，同一個種子才排得出同一份結果。"
+      },
+      {
+        "id": "ai-path",
+        "label": "AI 配對引擎",
+        "focus": [
+          "pairs",
+          "ai_score",
+          "ai_tier",
+          "round",
+          "ai_fail"
+        ],
+        "note": "只送對方看得到的欄位給決策模型；任一組失敗或逾時就整批失敗（D28），原排程引擎不受影響。"
+      },
+      {
+        "id": "compare-capacity",
+        "label": "引擎比較與容量預覽",
+        "focus": [
+          "pairs",
+          "std_tier",
+          "ai_tier",
+          "result"
+        ],
+        "note": "比較：同輸入同種子兩個引擎各排一次，不寫資料庫。容量上限＝時段數 × 兩組較小人數，再受每人場次上限約束。"
+      }
+    ]
+  },
+  "lanes": [
+    {
+      "id": "service",
+      "label": "MatchingScheduleService：準備輸入與寫入"
+    },
+    {
+      "id": "scheduler",
+      "label": "MatchingScheduler"
+    },
+    {
+      "id": "ai",
+      "label": "AI 配對引擎（engine = ai）"
+    }
+  ],
+  "phases": [
+    {
+      "id": "ph_check",
+      "label": "前置檢查",
+      "fromCol": 0,
+      "toCol": 1
+    },
+    {
+      "id": "ph_pairs",
+      "label": "候選配對",
+      "fromCol": 2,
+      "toCol": 2
+    },
+    {
+      "id": "ph_order",
+      "label": "分層排序",
+      "fromCol": 3,
+      "toCol": 3,
+      "variant": "emphasis"
+    },
+    {
+      "id": "ph_place",
+      "label": "輪流挑",
+      "fromCol": 4,
+      "toCol": 4,
+      "variant": "emphasis"
+    },
+    {
+      "id": "ph_out",
+      "label": "輸出",
+      "fromCol": 5,
+      "toCol": 5
+    }
+  ],
+  "mainPath": [
+    "gate",
+    "inputs",
+    "pairs",
+    "std_tier",
+    "round",
+    "result",
+    "save"
+  ],
+  "nodes": [
+    {
+      "id": "gate",
+      "lane": "service",
+      "col": 0,
+      "width": 140,
+      "type": "security",
+      "label": "執行前檢查",
+      "sublabel": "互選截止後（D18）"
+    },
+    {
+      "id": "inputs",
+      "lane": "service",
+      "col": 1,
+      "width": 140,
+      "type": "backend",
+      "label": "組輸入",
+      "sublabel": "已核可報名＋志願 1..N"
+    },
+    {
+      "id": "save",
+      "lane": "service",
+      "col": 5,
+      "width": 140,
+      "type": "database",
+      "label": "寫入時程表",
+      "sublabel": "單一交易＋存種子"
+    },
+    {
+      "id": "pairs",
+      "lane": "scheduler",
+      "col": 2,
+      "width": 140,
+      "type": "backend",
+      "label": "候選配對",
+      "sublabel": "甲 × 乙，判定原因"
+    },
+    {
+      "id": "std_tier",
+      "lane": "scheduler",
+      "col": 3,
+      "width": 140,
+      "type": "backend",
+      "label": "依志願分層",
+      "sublabel": "互選 → 單向 → 補位"
+    },
+    {
+      "id": "round",
+      "lane": "scheduler",
+      "col": 4,
+      "width": 140,
+      "type": "backend",
+      "label": "輪流挑",
+      "sublabel": "雙方最早共同空時段"
+    },
+    {
+      "id": "result",
+      "lane": "scheduler",
+      "col": 5,
+      "width": 140,
+      "type": "backend",
+      "label": "整理結果",
+      "sublabel": "沒排到原因＋摘要"
+    },
+    {
+      "id": "ai_fail",
+      "lane": "ai",
+      "col": 1,
+      "width": 140,
+      "type": "security",
+      "label": "整批失敗",
+      "sublabel": "原排程引擎不受影響"
+    },
+    {
+      "id": "ai_score",
+      "lane": "ai",
+      "col": 2,
+      "width": 140,
+      "type": "cloud",
+      "label": "AI 速配度",
+      "sublabel": "雙向各算，取較低者"
+    },
+    {
+      "id": "ai_tier",
+      "lane": "ai",
+      "col": 3,
+      "width": 140,
+      "type": "backend",
+      "label": "依總分排序",
+      "sublabel": "速配度＋志願加分"
+    }
+  ],
+  "edges": [
+    {
+      "from": "gate",
+      "to": "inputs",
+      "variant": "emphasis"
+    },
+    {
+      "from": "inputs",
+      "to": "pairs",
+      "variant": "emphasis"
+    },
+    {
+      "from": "pairs",
+      "to": "std_tier",
+      "label": "standard",
+      "variant": "emphasis"
+    },
+    {
+      "from": "std_tier",
+      "to": "round",
+      "variant": "emphasis"
+    },
+    {
+      "from": "round",
+      "to": "result",
+      "label": "每層做完",
+      "variant": "emphasis"
+    },
+    {
+      "from": "result",
+      "to": "save",
+      "variant": "emphasis"
+    },
+    {
+      "from": "pairs",
+      "to": "ai_score"
+    },
+    {
+      "from": "ai_score",
+      "to": "ai_tier"
+    },
+    {
+      "from": "ai_tier",
+      "to": "round"
+    },
+    {
+      "from": "ai_score",
+      "to": "ai_fail",
+      "label": "失敗或逾時",
+      "variant": "security",
+      "role": "error"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "兩個引擎只差在排序（D25）",
+      "items": [
+        "原排程引擎：互選 → 單向 → 補位，層內志願序小的先，同分用種子隨機（D12、D13）",
+        "AI 配對引擎：總分＝速配度＋0.3／甲組名次＋0.3／乙組名次，補位排最後（D26）",
+        "單向優先只影響原排程引擎；補位設定兩者都遵守（D27）"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "輪流挑與硬限制",
+      "items": [
+        "每輪每個單位挑一組：場次少的先，再看最好組合在整層的位置",
+        "放進雙方共同最早的空時段，排不進就標記不再看",
+        "同時段一人一場、同組合全場一次、每人最多場次"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "執行模式與輸出",
+      "items": [
+        "產生／全部重排（保留鎖定與手動，D23）／只補空時段（發布後可補約）",
+        "同輸入同種子必得同結果，種子存進時程表",
+        "沒排到原因：自己排滿 → 對方排滿 → 時段對不上"
+      ]
+    }
+  ]
+}

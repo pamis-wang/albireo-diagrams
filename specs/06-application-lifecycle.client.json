@@ -1,0 +1,167 @@
+{
+  "schema_version": 3,
+  "diagram_type": "lifecycle",
+  "meta": {
+    "title": "媒合活動報名的生命週期",
+    "output": "client/06-application-lifecycle.html",
+    "locale": "zh-TW",
+    "quality_profile": "showcase"
+  },
+  "mainPath": [
+    "none",
+    "gate",
+    "reviewing",
+    "approved",
+    "joined"
+  ],
+  "states": [
+    {
+      "id": "none",
+      "type": "start",
+      "label": "未報名",
+      "sublabel": "還沒報名這場活動",
+      "step": "01",
+      "tag": "起點"
+    },
+    {
+      "id": "gate",
+      "type": "decision",
+      "label": "可以報名嗎？",
+      "sublabel": "報名期間・名額未滿",
+      "step": "02",
+      "tag": "檢查"
+    },
+    {
+      "id": "reviewing",
+      "type": "waiting",
+      "label": "審核中",
+      "sublabel": "佔名額・可修改或取消",
+      "step": "03",
+      "tag": "等主辦審核"
+    },
+    {
+      "id": "approved",
+      "type": "active",
+      "label": "已核可",
+      "sublabel": "取得報名編號",
+      "step": "04",
+      "tag": "通過"
+    },
+    {
+      "id": "joined",
+      "type": "success",
+      "label": "參與媒合",
+      "sublabel": "互選・排程・看結果",
+      "step": "05",
+      "tag": "互選開始後"
+    },
+    {
+      "id": "rejected",
+      "type": "failure",
+      "label": "不核可",
+      "sublabel": "不佔名額・可改判",
+      "tag": "不佔名額"
+    },
+    {
+      "id": "canceled",
+      "type": "failure",
+      "label": "已取消",
+      "sublabel": "重新報名請洽主辦單位",
+      "tag": "不佔名額"
+    }
+  ],
+  "transitions": [
+    {
+      "id": "t-submit",
+      "from": "none",
+      "to": "gate",
+      "label": "送出報名"
+    },
+    {
+      "id": "t-pass",
+      "from": "gate",
+      "to": "reviewing",
+      "label": "符合條件"
+    },
+    {
+      "id": "t-block",
+      "from": "gate",
+      "to": "none",
+      "label": "期間外或額滿",
+      "variant": "security"
+    },
+    {
+      "id": "t-approve",
+      "from": "reviewing",
+      "to": "approved",
+      "label": "主辦核可"
+    },
+    {
+      "id": "t-join",
+      "from": "approved",
+      "to": "joined",
+      "label": "互選開始"
+    },
+    {
+      "id": "t-self-cancel",
+      "from": "reviewing",
+      "to": "canceled",
+      "label": "參展單位自行取消"
+    },
+    {
+      "id": "t-restore",
+      "from": "canceled",
+      "to": "reviewing",
+      "label": "主辦改回審核中",
+      "variant": "emphasis"
+    },
+    {
+      "id": "t-reject",
+      "from": "reviewing",
+      "to": "rejected",
+      "label": "主辦不核可",
+      "variant": "security"
+    },
+    {
+      "id": "t-overturn",
+      "from": "rejected",
+      "to": "approved",
+      "label": "改判核可",
+      "variant": "emphasis"
+    },
+    {
+      "id": "t-revoke",
+      "from": "approved",
+      "to": "rejected",
+      "label": "撤銷核可",
+      "variant": "security"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "amber",
+      "title": "名額",
+      "items": [
+        "審核中與已核可佔名額",
+        "不核可、已取消自動釋出名額"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "參展單位可以做的",
+      "items": [
+        "報名期間內報名與修改",
+        "審核中可以自行取消"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "主辦單位可以做的",
+      "items": [
+        "核可時配發報名編號",
+        "撤銷核可會一併清除互選與會談",
+        "時程表發布後要先移除會談"
+      ]
+    }
+  ]
+}

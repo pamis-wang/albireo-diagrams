@@ -1,0 +1,335 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "AlbireoBackend 分層相依",
+    "output": "engineer/11-backend-layers.html",
+    "locale": "zh-TW",
+    "quality_profile": "showcase",
+    "views": [
+      {
+        "id": "roots",
+        "label": "Composition Root",
+        "focus": [
+          "api_hosts",
+          "mcp_hosts",
+          "api_base",
+          "mcp_base"
+        ],
+        "note": "六個主機各自是 Composition Root；API.Base 引用 Repositories，DI 註冊才認得具體實作。"
+      },
+      {
+        "id": "core",
+        "label": "業務與資料存取",
+        "focus": [
+          "services",
+          "repositories",
+          "infrastructure",
+          "domain"
+        ],
+        "note": "Services 只認 Domain 的介面；Repositories 經 Infrastructure 的 EF Core 實體與 Context 存取資料。"
+      },
+      {
+        "id": "tooling",
+        "label": "測試與工具",
+        "focus": [
+          "tests",
+          "migration",
+          "razor"
+        ],
+        "note": "整合測試直接引用主機專案，走真實 HTTP 與 MCP 管線；DatabaseMigration 只依 Infrastructure。"
+      }
+    ],
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "external": {
+          "label": "測試與工具"
+        },
+        "security": {
+          "label": "共用基底"
+        },
+        "backend": {
+          "label": "執行期專案"
+        }
+      }
+    }
+  },
+  "components": [
+    {
+      "id": "tests",
+      "type": "external",
+      "label": "IntegrationTest.*",
+      "sublabel": "7 個專案",
+      "pos": [
+        30,
+        250
+      ],
+      "size": [
+        150,
+        68
+      ]
+    },
+    {
+      "id": "api_hosts",
+      "type": "backend",
+      "label": "API.* ×3",
+      "sublabel": "Composition Root",
+      "pos": [
+        250,
+        90
+      ],
+      "size": [
+        160,
+        68
+      ]
+    },
+    {
+      "id": "mcp_hosts",
+      "type": "backend",
+      "label": "MCP.* ×3",
+      "sublabel": "Composition Root",
+      "pos": [
+        250,
+        410
+      ],
+      "size": [
+        160,
+        68
+      ]
+    },
+    {
+      "id": "api_base",
+      "type": "security",
+      "label": "API.Base",
+      "sublabel": "範圍 middleware · 授權",
+      "pos": [
+        480,
+        90
+      ],
+      "size": [
+        150,
+        68
+      ]
+    },
+    {
+      "id": "mcp_base",
+      "type": "security",
+      "label": "MCP.Base",
+      "sublabel": "API 金鑰 · 流量限制",
+      "pos": [
+        480,
+        410
+      ],
+      "size": [
+        150,
+        68
+      ]
+    },
+    {
+      "id": "services",
+      "type": "backend",
+      "label": "Services",
+      "sublabel": "業務邏輯",
+      "pos": [
+        700,
+        90
+      ],
+      "size": [
+        150,
+        68
+      ]
+    },
+    {
+      "id": "repositories",
+      "type": "backend",
+      "label": "Repositories",
+      "sublabel": "Database／Cache／Hybrid",
+      "pos": [
+        700,
+        250
+      ],
+      "size": [
+        150,
+        68
+      ]
+    },
+    {
+      "id": "migration",
+      "type": "external",
+      "label": "DatabaseMigration",
+      "sublabel": "migration · 種子",
+      "pos": [
+        700,
+        410
+      ],
+      "size": [
+        150,
+        68
+      ]
+    },
+    {
+      "id": "infrastructure",
+      "type": "backend",
+      "label": "Infrastructure",
+      "sublabel": "EF Core · Redis · 寄信",
+      "pos": [
+        920,
+        250
+      ],
+      "size": [
+        150,
+        68
+      ]
+    },
+    {
+      "id": "extensions",
+      "type": "backend",
+      "label": "Extensions",
+      "sublabel": "共用擴充方法",
+      "pos": [
+        1140,
+        90
+      ],
+      "size": [
+        150,
+        68
+      ]
+    },
+    {
+      "id": "domain",
+      "type": "backend",
+      "label": "Domain",
+      "sublabel": "模型 · 介面 · 合約",
+      "pos": [
+        1140,
+        250
+      ],
+      "size": [
+        150,
+        68
+      ]
+    },
+    {
+      "id": "razor",
+      "type": "backend",
+      "label": "RazorTemplates",
+      "sublabel": "信件範本",
+      "pos": [
+        1140,
+        410
+      ],
+      "size": [
+        150,
+        68
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "r_test_api",
+      "from": "tests",
+      "to": "api_hosts"
+    },
+    {
+      "id": "r_test_mcp",
+      "from": "tests",
+      "to": "mcp_hosts"
+    },
+    {
+      "id": "r_api_base",
+      "from": "api_hosts",
+      "to": "api_base",
+      "variant": "emphasis"
+    },
+    {
+      "id": "r_mcp_base",
+      "from": "mcp_hosts",
+      "to": "mcp_base",
+      "variant": "emphasis"
+    },
+    {
+      "id": "r_mcpbase_apibase",
+      "from": "mcp_base",
+      "to": "api_base"
+    },
+    {
+      "id": "r_base_services",
+      "from": "api_base",
+      "to": "services",
+      "variant": "emphasis"
+    },
+    {
+      "id": "r_base_repos",
+      "from": "api_base",
+      "to": "repositories",
+      "label": "註冊實作"
+    },
+    {
+      "id": "r_services_domain",
+      "from": "services",
+      "to": "domain",
+      "label": "只認介面",
+      "variant": "emphasis"
+    },
+    {
+      "id": "r_services_ext",
+      "from": "services",
+      "to": "extensions"
+    },
+    {
+      "id": "r_repos_infra",
+      "from": "repositories",
+      "to": "infrastructure"
+    },
+    {
+      "id": "r_migration_infra",
+      "from": "migration",
+      "to": "infrastructure"
+    },
+    {
+      "id": "r_infra_domain",
+      "from": "infrastructure",
+      "to": "domain"
+    },
+    {
+      "id": "r_infra_razor",
+      "from": "infrastructure",
+      "to": "razor"
+    },
+    {
+      "id": "r_razor_domain",
+      "from": "razor",
+      "to": "domain"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "相依方向（csproj 實測）",
+      "items": [
+        "箭頭＝ProjectReference；節點名稱省略 Albireo. 前綴",
+        "Domain、Extensions 不引用任何專案；Services 只引用 Domain＋Extensions，EF Core 不會遞移進服務層",
+        "Repositories、Infrastructure、DatabaseMigration 也引用 Extensions（圖上省略）"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "硬規則",
+      "items": [
+        "Controller 不得注入 Repository、DbContext、Provider 或 Client，一律經 Service",
+        "Service 之間不互相呼叫：跨實體寫入走 Repository 的單一交易方法",
+        "例外不跨層：RepositoryOperationResult → ServiceOperationResult → BaseResponse"
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "主機與共用基底",
+      "items": [
+        "六個主機各自 Program.cs＋DependencyInjection.cs",
+        "API.Base：基底控制器、OrganizerScopeMiddleware、權限授權、ModelBinder、Scalar",
+        "MCP.Base 建在 API.Base 上：API 金鑰驗證、流量限制、工具呼叫篩選器"
+      ]
+    }
+  ]
+}

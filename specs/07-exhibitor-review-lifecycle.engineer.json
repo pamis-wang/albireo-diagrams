@@ -1,0 +1,139 @@
+{
+  "schema_version": 3,
+  "diagram_type": "lifecycle",
+  "meta": {
+    "title": "參展單位審核生命週期（工程師版）",
+    "output": "engineer/07-exhibitor-review-lifecycle.html",
+    "locale": "zh-TW",
+    "quality_profile": "showcase"
+  },
+  "mainPath": [
+    "register",
+    "pending",
+    "review",
+    "approved"
+  ],
+  "states": [
+    {
+      "id": "register",
+      "type": "start",
+      "label": "自行註冊",
+      "sublabel": "寄開通信・設密碼",
+      "step": "01",
+      "tag": "RegisterExhibitor"
+    },
+    {
+      "id": "pending",
+      "type": "waiting",
+      "label": "待審核",
+      "sublabel": "還不能登入",
+      "step": "02",
+      "tag": "pending"
+    },
+    {
+      "id": "review",
+      "type": "decision",
+      "label": "主辦審核",
+      "sublabel": "ReviewExhibitorAsync",
+      "step": "03",
+      "tag": "寄結果通知"
+    },
+    {
+      "id": "approved",
+      "type": "success",
+      "label": "已核准",
+      "sublabel": "帳號可登入",
+      "step": "04",
+      "tag": "approved"
+    },
+    {
+      "id": "rejected",
+      "type": "failure",
+      "label": "未通過",
+      "sublabel": "顯示審核說明",
+      "tag": "rejected"
+    },
+    {
+      "id": "suspended",
+      "type": "failure",
+      "label": "已停權",
+      "sublabel": "換發權杖也擋下",
+      "tag": "suspended"
+    }
+  ],
+  "transitions": [
+    {
+      "id": "t-register",
+      "from": "register",
+      "to": "pending",
+      "label": "送出註冊"
+    },
+    {
+      "id": "t-queue",
+      "from": "pending",
+      "to": "review",
+      "label": "送交主辦"
+    },
+    {
+      "id": "t-approve",
+      "from": "review",
+      "to": "approved",
+      "label": "核准"
+    },
+    {
+      "id": "t-reject",
+      "from": "review",
+      "to": "rejected",
+      "label": "未通過",
+      "variant": "security"
+    },
+    {
+      "id": "t-overturn",
+      "from": "rejected",
+      "to": "approved",
+      "label": "改判核准",
+      "variant": "emphasis"
+    },
+    {
+      "id": "t-suspend",
+      "from": "approved",
+      "to": "suspended",
+      "label": "停權",
+      "variant": "security"
+    },
+    {
+      "id": "t-reinstate",
+      "from": "suspended",
+      "to": "approved",
+      "label": "復權",
+      "variant": "emphasis"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "amber",
+      "title": "登入檢查（驗密碼前）",
+      "items": [
+        "帳號須已開通（ActivateAt）且未停用",
+        "pending／rejected／suspended 各回對應訊息"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "AllowedTransitions",
+      "items": [
+        "approved ← pending／rejected／suspended",
+        "rejected ← pending；suspended ← approved",
+        "沒有終止狀態：每一種都能改回"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "通知與權杖",
+      "items": [
+        "每次審核寄信給所有未停用帳號，中英並列",
+        "停權後換發權杖失敗並刪除 refresh token"
+      ]
+    }
+  ]
+}

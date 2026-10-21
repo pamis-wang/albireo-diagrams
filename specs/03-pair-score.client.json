@@ -1,0 +1,300 @@
+{
+  "schema_version": 1,
+  "diagram_type": "dataflow",
+  "meta": {
+    "title": "Albireo 速配度計算（客戶版）",
+    "output": "client/03-pair-score.html",
+    "locale": "zh-TW",
+    "quality_profile": "showcase",
+    "viewBox": [
+      1080,
+      540
+    ],
+    "views": [
+      {
+        "id": "privacy",
+        "label": "隱私保護",
+        "focus": [
+          "application",
+          "schema",
+          "counterpartView"
+        ],
+        "note": "AI 只看得到對方在報名表上公開的內容，聯絡方式與姓名職稱一律不送出。"
+      },
+      {
+        "id": "dimensions",
+        "label": "怎麼算分",
+        "focus": [
+          "business",
+          "market",
+          "wants",
+          "decision",
+          "combine"
+        ],
+        "note": "每一題是一個比對面向，依主辦單位設定的權重加權平均。"
+      },
+      {
+        "id": "consumers",
+        "label": "用在哪裡",
+        "focus": [
+          "combine",
+          "mateList",
+          "aiEngine",
+          "reason"
+        ],
+        "note": "同一套比對結果用在互選推薦、AI 排程與推薦理由。"
+      }
+    ]
+  },
+  "stages": [
+    {
+      "label": "報名資料"
+    },
+    {
+      "label": "隱私過濾"
+    },
+    {
+      "label": "逐面向計分"
+    },
+    {
+      "label": "互補判斷與合成"
+    },
+    {
+      "label": "用途"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "application",
+      "type": "frontend",
+      "label": "報名資料",
+      "sublabel": "自我介紹＋想找的對象",
+      "stage": 0,
+      "row": 0
+    },
+    {
+      "id": "schema",
+      "type": "backend",
+      "label": "主辦單位設定",
+      "sublabel": "公開範圍・題目權重",
+      "stage": 0,
+      "row": 2
+    },
+    {
+      "id": "counterpartView",
+      "type": "security",
+      "label": "只取公開資料",
+      "sublabel": "不含聯絡方式與姓名職稱",
+      "stage": 1,
+      "row": 1
+    },
+    {
+      "id": "business",
+      "type": "backend",
+      "label": "業務互補",
+      "sublabel": "業務項目",
+      "stage": 2,
+      "row": 0
+    },
+    {
+      "id": "market",
+      "type": "backend",
+      "label": "市場重疊",
+      "sublabel": "經營市場",
+      "stage": 2,
+      "row": 1
+    },
+    {
+      "id": "wants",
+      "type": "backend",
+      "label": "其他條件",
+      "sublabel": "主辦開放的題目",
+      "stage": 2,
+      "row": 2
+    },
+    {
+      "id": "decision",
+      "type": "external",
+      "label": "AI 業務判斷",
+      "sublabel": "判斷業務互補程度",
+      "stage": 3,
+      "row": 0
+    },
+    {
+      "id": "combine",
+      "type": "backend",
+      "label": "加權計算",
+      "sublabel": "依題目權重平均",
+      "stage": 3,
+      "row": 1
+    },
+    {
+      "id": "mateList",
+      "type": "frontend",
+      "label": "互選推薦名單",
+      "sublabel": "參展單位挑選參考",
+      "stage": 4,
+      "row": 0
+    },
+    {
+      "id": "aiEngine",
+      "type": "backend",
+      "label": "AI 配對引擎",
+      "sublabel": "排時程表時參考",
+      "stage": 4,
+      "row": 1
+    },
+    {
+      "id": "reason",
+      "type": "external",
+      "label": "AI 推薦理由",
+      "sublabel": "說明為什麼推薦",
+      "stage": 4,
+      "row": 2
+    }
+  ],
+  "flows": [
+    {
+      "id": "application-view",
+      "from": "application",
+      "to": "counterpartView",
+      "label": "完整報名",
+      "variant": "default"
+    },
+    {
+      "id": "schema-view",
+      "from": "schema",
+      "to": "counterpartView",
+      "label": "公開範圍",
+      "variant": "default"
+    },
+    {
+      "id": "view-business",
+      "from": "counterpartView",
+      "to": "business",
+      "label": "業務資料",
+      "variant": "security",
+      "fromSide": "top",
+      "via": [
+        [
+          315,
+          157
+        ]
+      ]
+    },
+    {
+      "id": "view-market",
+      "from": "counterpartView",
+      "to": "market",
+      "label": "市場資料",
+      "variant": "security"
+    },
+    {
+      "id": "view-wants",
+      "from": "counterpartView",
+      "to": "wants",
+      "label": "條件資料",
+      "variant": "security",
+      "fromSide": "bottom",
+      "via": [
+        [
+          315,
+          385
+        ]
+      ]
+    },
+    {
+      "id": "business-decision",
+      "from": "business",
+      "to": "decision",
+      "label": "沒直接命中時",
+      "variant": "dashed"
+    },
+    {
+      "id": "decision-combine",
+      "from": "decision",
+      "to": "combine",
+      "label": "互補程度",
+      "variant": "default",
+      "labelAt": [
+        745,
+        214
+      ]
+    },
+    {
+      "id": "market-combine",
+      "from": "market",
+      "to": "combine",
+      "label": "重疊程度",
+      "variant": "emphasis"
+    },
+    {
+      "id": "wants-combine",
+      "from": "wants",
+      "to": "combine",
+      "label": "是否符合",
+      "variant": "default",
+      "toSide": "bottom",
+      "via": [
+        [
+          745,
+          385
+        ]
+      ]
+    },
+    {
+      "id": "combine-mates",
+      "from": "combine",
+      "to": "mateList",
+      "label": "推薦分數",
+      "variant": "emphasis"
+    },
+    {
+      "id": "combine-engine",
+      "from": "combine",
+      "to": "aiEngine",
+      "label": "雙向",
+      "variant": "emphasis",
+      "labelAt": [
+        878,
+        271
+      ]
+    },
+    {
+      "id": "combine-reason",
+      "from": "combine",
+      "to": "reason",
+      "label": "比對結果",
+      "variant": "dashed"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "rose",
+      "title": "AI 看得到什麼",
+      "items": [
+        "只看對方在報名表上設為公開的內容",
+        "聯絡方式、出席者姓名與職稱一律不送給 AI",
+        "哪些題目公開、哪些題目算分，由主辦單位決定"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "分數怎麼算",
+      "items": [
+        "每一題是一個比對面向，依權重（不計、低、一般、高）加權平均",
+        "業務項目命中想找的類型就是滿分；沒命中時由 AI 判斷接近程度",
+        "對方沒填的題目給中間分；排程時取雙方各自分數中較低的那個"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "AI 出狀況時",
+      "items": [
+        "AI 的判斷會保存一段時間，同樣的組合不重複詢問",
+        "AI 失敗或逾時不影響報名與互選，推薦名單改用條件比對",
+        "AI 配對引擎算不出完整分數時請主辦單位稍後再試，原排程引擎照常可用"
+      ]
+    }
+  ]
+}

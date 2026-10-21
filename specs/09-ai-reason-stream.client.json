@@ -1,0 +1,265 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Albireo AI 推薦理由串流（客戶版）",
+    "output": "client/09-ai-reason-stream.html",
+    "locale": "zh-TW",
+    "quality_profile": "showcase",
+    "column_fit": "spread",
+    "viewBox": [
+      1080,
+      548
+    ],
+    "views": [
+      {
+        "id": "prepare",
+        "label": "準備事實",
+        "focus": [
+          "exhibitor",
+          "platform",
+          "cache",
+          "decision"
+        ],
+        "note": "先確認雙方業務互補程度，理由和速配度說的是同一件事。"
+      },
+      {
+        "id": "writing",
+        "label": "AI 撰寫",
+        "focus": [
+          "platform",
+          "llm",
+          "exhibitor"
+        ],
+        "note": "AI 邊寫邊送，參展單位看到文字一段段出現。"
+      },
+      {
+        "id": "finalize",
+        "label": "定稿與保存",
+        "focus": [
+          "platform",
+          "cache",
+          "exhibitor"
+        ],
+        "note": "內容合格才定稿並保存；不合格就改列相符的條件。"
+      }
+    ]
+  },
+  "participants": [
+    {
+      "id": "exhibitor",
+      "type": "frontend",
+      "label": "參展單位",
+      "sublabel": "互選頁"
+    },
+    {
+      "id": "platform",
+      "type": "backend",
+      "label": "Albireo 平台",
+      "sublabel": "推薦理由服務"
+    },
+    {
+      "id": "cache",
+      "type": "database",
+      "label": "結果暫存",
+      "sublabel": "保存 30 天"
+    },
+    {
+      "id": "decision",
+      "type": "external",
+      "label": "AI 業務判斷",
+      "sublabel": "判斷業務互補"
+    },
+    {
+      "id": "llm",
+      "type": "external",
+      "label": "AI 撰寫",
+      "sublabel": "語言模型"
+    }
+  ],
+  "segments": [
+    {
+      "from": 150,
+      "to": 258,
+      "label": "準備事實"
+    },
+    {
+      "from": 264,
+      "to": 312,
+      "label": "先查暫存"
+    },
+    {
+      "from": 318,
+      "to": 396,
+      "label": "AI 撰寫"
+    },
+    {
+      "from": 402,
+      "to": 450,
+      "label": "定稿"
+    }
+  ],
+  "messages": [
+    {
+      "id": "open-candidate",
+      "from": "exhibitor",
+      "to": "platform",
+      "y": 160,
+      "label": "點開候選對象",
+      "variant": "emphasis"
+    },
+    {
+      "id": "fit-cache",
+      "from": "platform",
+      "to": "cache",
+      "y": 188,
+      "label": "查業務判斷",
+      "variant": "default"
+    },
+    {
+      "id": "ask-fit",
+      "from": "platform",
+      "to": "decision",
+      "y": 216,
+      "label": "沒有才請 AI 判斷",
+      "variant": "dashed"
+    },
+    {
+      "id": "fit-level",
+      "from": "decision",
+      "to": "platform",
+      "y": 244,
+      "label": "業務互補程度",
+      "variant": "return"
+    },
+    {
+      "id": "reason-cache",
+      "from": "platform",
+      "to": "cache",
+      "y": 272,
+      "label": "查是否寫過",
+      "variant": "default"
+    },
+    {
+      "id": "reason-hit",
+      "from": "cache",
+      "to": "platform",
+      "y": 300,
+      "label": "寫過就直接給",
+      "variant": "return"
+    },
+    {
+      "id": "open-stream",
+      "from": "platform",
+      "to": "llm",
+      "y": 328,
+      "label": "比對事實＋主辦設定",
+      "variant": "emphasis"
+    },
+    {
+      "id": "text-chunk",
+      "from": "llm",
+      "to": "platform",
+      "y": 356,
+      "label": "邊寫邊回傳",
+      "variant": "return"
+    },
+    {
+      "id": "show-delta",
+      "from": "platform",
+      "to": "exhibitor",
+      "y": 384,
+      "label": "逐段顯示",
+      "variant": "emphasis"
+    },
+    {
+      "id": "save-reason",
+      "from": "platform",
+      "to": "cache",
+      "y": 412,
+      "label": "合格才保存",
+      "variant": "dashed"
+    },
+    {
+      "id": "finalize",
+      "from": "platform",
+      "to": "exhibitor",
+      "y": 440,
+      "label": "定稿或改列相符條件",
+      "variant": "emphasis"
+    }
+  ],
+  "activations": [
+    {
+      "participant": "exhibitor",
+      "from": 156,
+      "to": 446,
+      "type": "frontend"
+    },
+    {
+      "participant": "platform",
+      "from": 160,
+      "to": 446,
+      "type": "backend"
+    },
+    {
+      "participant": "cache",
+      "from": 183,
+      "to": 194,
+      "type": "database"
+    },
+    {
+      "participant": "decision",
+      "from": 211,
+      "to": 250,
+      "type": "external"
+    },
+    {
+      "participant": "cache",
+      "from": 267,
+      "to": 306,
+      "type": "database"
+    },
+    {
+      "participant": "llm",
+      "from": 323,
+      "to": 362,
+      "type": "external"
+    },
+    {
+      "participant": "cache",
+      "from": 407,
+      "to": 418,
+      "type": "database"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "看到的效果",
+      "items": [
+        "點開候選對象才產生，文字一段段出現，不必乾等",
+        "同樣的組合第二次打開直接顯示，不再等 AI",
+        "可選繁體中文或英文，兩種語言各自產生"
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "AI 怎麼寫",
+      "items": [
+        "只根據與速配度同一套比對事實撰寫，不自行推測",
+        "不提分數；條件不好，不會說成很適合",
+        "主辦單位可設定語氣、長度（短、中、長）與額外要求"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "出狀況時",
+      "items": [
+        "AI 失敗、逾時或內容不合格時不顯示理由，改列出相符的條件",
+        "不合格的內容不保存，下次重新產生",
+        "離開頁面就停止產生，不浪費 AI 費用"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,179 @@
+{
+  "schema_version": 3,
+  "diagram_type": "lifecycle",
+  "meta": {
+    "title": "時程表生命週期（工程師版）",
+    "output": "engineer/05-schedule-lifecycle.html",
+    "locale": "zh-TW",
+    "quality_profile": "showcase"
+  },
+  "mainPath": [
+    "none",
+    "gate",
+    "draft",
+    "published",
+    "visible"
+  ],
+  "states": [
+    {
+      "id": "none",
+      "type": "start",
+      "label": "未產生",
+      "sublabel": "查無主檔・不入庫",
+      "step": "01",
+      "tag": "not_generated"
+    },
+    {
+      "id": "gate",
+      "type": "decision",
+      "label": "互選已截止？",
+      "sublabel": "未截止建立回 409",
+      "step": "02",
+      "tag": "D18"
+    },
+    {
+      "id": "draft",
+      "type": "active",
+      "label": "草稿",
+      "sublabel": "只有後台看得到",
+      "step": "03",
+      "tag": "draft"
+    },
+    {
+      "id": "published",
+      "type": "waiting",
+      "label": "已發布",
+      "sublabel": "等 MateResultAt",
+      "step": "04",
+      "tag": "published"
+    },
+    {
+      "id": "visible",
+      "type": "success",
+      "label": "參展單位看得到",
+      "sublabel": "已發布＋結果已公布",
+      "step": "05",
+      "tag": "ResultPublished"
+    },
+    {
+      "id": "rerun",
+      "type": "active",
+      "label": "草稿期操作",
+      "sublabel": "rerun_all／fill_only／手動",
+      "tag": "草稿可用"
+    },
+    {
+      "id": "fill",
+      "type": "active",
+      "label": "補空・逐場調整",
+      "sublabel": "fill_only／移動／交換",
+      "tag": "發布後可用"
+    },
+    {
+      "id": "discard",
+      "type": "neutral",
+      "label": "捨棄草稿",
+      "sublabel": "刪除會談・互選解鎖",
+      "tag": "DiscardSchedule"
+    }
+  ],
+  "transitions": [
+    {
+      "id": "t-start",
+      "from": "none",
+      "to": "gate",
+      "label": "產生或建草稿"
+    },
+    {
+      "id": "t-pass",
+      "from": "gate",
+      "to": "draft",
+      "label": "已截止"
+    },
+    {
+      "id": "t-block",
+      "from": "gate",
+      "to": "none",
+      "label": "未截止 409",
+      "variant": "security"
+    },
+    {
+      "id": "t-publish",
+      "from": "draft",
+      "to": "published",
+      "label": "發布"
+    },
+    {
+      "id": "t-visible",
+      "from": "published",
+      "to": "visible",
+      "label": "到 MateResultAt"
+    },
+    {
+      "id": "t-rerun",
+      "from": "draft",
+      "to": "rerun",
+      "label": "執行排程"
+    },
+    {
+      "id": "t-rerun-back",
+      "from": "rerun",
+      "to": "draft",
+      "variant": "emphasis"
+    },
+    {
+      "id": "t-fill",
+      "from": "published",
+      "to": "fill",
+      "label": "補約"
+    },
+    {
+      "id": "t-fill-back",
+      "from": "fill",
+      "to": "published",
+      "variant": "emphasis"
+    },
+    {
+      "id": "t-discard",
+      "from": "draft",
+      "to": "discard",
+      "label": "捨棄",
+      "variant": "security"
+    },
+    {
+      "id": "t-discard-reset",
+      "from": "discard",
+      "to": "none",
+      "label": "回到未產生"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "amber",
+      "title": "鎖定",
+      "items": [
+        "時程表存在時，互選與時段變更回 409",
+        "捨棄草稿才解鎖；已發布不能捨棄"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "執行模式",
+      "items": [
+        "generate：尚無時程表才可用",
+        "rerun_all：限草稿，保留鎖定與 Manual",
+        "fill_only：兩種狀態皆可，既有不動",
+        "排程與調整不改變時程表狀態"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "參展單位可見",
+      "items": [
+        "報名 approved",
+        "時程表 published",
+        "階段 ResultPublished"
+      ]
+    }
+  ]
+}

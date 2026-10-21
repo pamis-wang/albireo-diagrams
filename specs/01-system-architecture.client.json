@@ -1,0 +1,283 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Albireo 平台架構",
+    "output": "client/01-system-architecture.html",
+    "locale": "zh-TW",
+    "quality_profile": "showcase",
+    "views": [
+      {
+        "id": "portals",
+        "label": "三個角色、三個入口",
+        "focus": [
+          "op_portal",
+          "org_portal",
+          "exh_portal",
+          "platform"
+        ],
+        "note": "營運、主辦單位、參展單位各有自己的入口，登入各自獨立、不能互通。"
+      },
+      {
+        "id": "isolation",
+        "label": "資料隔離",
+        "focus": [
+          "platform",
+          "db",
+          "ai_channel"
+        ],
+        "note": "所有主辦單位放在同一個平台，但每個主辦單位只看得到自己的資料。"
+      },
+      {
+        "id": "ai",
+        "label": "AI 的角色",
+        "focus": [
+          "ai_assistant",
+          "ai_channel",
+          "platform",
+          "ai_service"
+        ],
+        "note": "AI 只是輔助：失敗不影響主要流程；AI 助理只能查詢，不能審核、排程或發布。"
+      }
+    ]
+  },
+  "components": [
+    {
+      "id": "domain",
+      "type": "cloud",
+      "label": "主辦單位專屬網址",
+      "sublabel": "未完成 · 子網域與自有網域",
+      "pos": [
+        30,
+        222
+      ],
+      "size": [
+        170,
+        72
+      ]
+    },
+    {
+      "id": "op_portal",
+      "type": "frontend",
+      "label": "營運後台",
+      "sublabel": "平台營運團隊",
+      "pos": [
+        270,
+        60
+      ],
+      "size": [
+        190,
+        68
+      ]
+    },
+    {
+      "id": "org_portal",
+      "type": "frontend",
+      "label": "主辦單位後台",
+      "sublabel": "帳號、審核、活動、時程表",
+      "pos": [
+        270,
+        190
+      ],
+      "size": [
+        190,
+        68
+      ]
+    },
+    {
+      "id": "exh_portal",
+      "type": "frontend",
+      "label": "參展單位專區",
+      "sublabel": "報名、互選、時程 · 中英文",
+      "pos": [
+        270,
+        320
+      ],
+      "size": [
+        190,
+        68
+      ]
+    },
+    {
+      "id": "ai_assistant",
+      "type": "external",
+      "label": "AI 助理",
+      "sublabel": "Claude 等 AI 工具",
+      "brand": "claude",
+      "pos": [
+        270,
+        470
+      ],
+      "size": [
+        190,
+        68
+      ]
+    },
+    {
+      "id": "platform",
+      "type": "backend",
+      "label": "Albireo 平台服務",
+      "sublabel": "三個入口各自登入",
+      "pos": [
+        620,
+        180
+      ],
+      "size": [
+        200,
+        88
+      ]
+    },
+    {
+      "id": "ai_channel",
+      "type": "security",
+      "label": "AI 查詢通道",
+      "sublabel": "唯讀 · 權限等同帳號本人",
+      "pos": [
+        620,
+        470
+      ],
+      "size": [
+        200,
+        68
+      ]
+    },
+    {
+      "id": "ai_service",
+      "type": "external",
+      "label": "AI 服務",
+      "sublabel": "速配度 · 推薦理由",
+      "pos": [
+        980,
+        60
+      ],
+      "size": [
+        190,
+        68
+      ]
+    },
+    {
+      "id": "email",
+      "type": "external",
+      "label": "電子郵件",
+      "sublabel": "開通 · 邀請 · 審核通知",
+      "pos": [
+        980,
+        190
+      ],
+      "size": [
+        190,
+        68
+      ]
+    },
+    {
+      "id": "db",
+      "type": "database",
+      "label": "資料庫",
+      "sublabel": "主辦單位之間資料隔離",
+      "pos": [
+        980,
+        400
+      ],
+      "size": [
+        190,
+        76
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "c_dom_org",
+      "from": "domain",
+      "to": "org_portal",
+      "variant": "dashed"
+    },
+    {
+      "id": "c_dom_exh",
+      "from": "domain",
+      "to": "exh_portal",
+      "variant": "dashed"
+    },
+    {
+      "id": "c_op",
+      "from": "op_portal",
+      "to": "platform",
+      "label": "營運帳號",
+      "variant": "emphasis"
+    },
+    {
+      "id": "c_org",
+      "from": "org_portal",
+      "to": "platform",
+      "label": "主辦帳號",
+      "variant": "emphasis"
+    },
+    {
+      "id": "c_exh",
+      "from": "exh_portal",
+      "to": "platform",
+      "label": "參展帳號",
+      "variant": "emphasis"
+    },
+    {
+      "id": "c_ai",
+      "from": "ai_assistant",
+      "to": "ai_channel",
+      "label": "個人金鑰",
+      "variant": "security"
+    },
+    {
+      "id": "c_ai_svc",
+      "from": "platform",
+      "to": "ai_service",
+      "label": "輔助分析"
+    },
+    {
+      "id": "c_email",
+      "from": "platform",
+      "to": "email",
+      "label": "寄信",
+      "labelDx": 40
+    },
+    {
+      "id": "c_db",
+      "from": "platform",
+      "to": "db",
+      "label": "讀寫"
+    },
+    {
+      "id": "c_ch_db",
+      "from": "ai_channel",
+      "to": "db",
+      "label": "只讀"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "三種角色",
+      "items": [
+        "營運（平台方）：開通主辦單位、建立第一位管理者",
+        "主辦單位：管理帳號權限、審核參展單位、開媒合活動、排時程表",
+        "參展單位：在所屬主辦單位底下註冊，報名、互選、查看時程表"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "資料隔離",
+      "items": [
+        "每個主辦單位只看得到自己的資料，系統預設拒絕而不是預設全開",
+        "同一家公司參加兩個主辦單位的活動，是兩個獨立帳號",
+        "三個入口的登入各自獨立，不能拿到別的入口使用"
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "AI 的角色",
+      "items": [
+        "速配度與推薦理由只是輔助：AI 失敗或逾時，報名、互選、排程照常進行",
+        "AI 只拿得到對方本來就看得到的資料，聯絡方式一律不送",
+        "AI 助理查詢通道只能查詢，不能審核、排程或發布，也不寄信"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,140 @@
+{
+  "schema_version": 3,
+  "diagram_type": "lifecycle",
+  "meta": {
+    "title": "參展單位審核的生命週期",
+    "output": "client/07-exhibitor-review-lifecycle.html",
+    "locale": "zh-TW",
+    "quality_profile": "showcase"
+  },
+  "mainPath": [
+    "register",
+    "pending",
+    "review",
+    "approved"
+  ],
+  "states": [
+    {
+      "id": "register",
+      "type": "start",
+      "label": "自行註冊",
+      "sublabel": "收開通信・設定密碼",
+      "step": "01",
+      "tag": "參展單位"
+    },
+    {
+      "id": "pending",
+      "type": "waiting",
+      "label": "待審核",
+      "sublabel": "這段期間不能登入",
+      "step": "02",
+      "tag": "等待"
+    },
+    {
+      "id": "review",
+      "type": "decision",
+      "label": "主辦單位審核",
+      "sublabel": "通過或不通過",
+      "step": "03",
+      "tag": "寄通知信"
+    },
+    {
+      "id": "approved",
+      "type": "success",
+      "label": "已核准",
+      "sublabel": "可以登入使用",
+      "step": "04",
+      "tag": "開通"
+    },
+    {
+      "id": "rejected",
+      "type": "failure",
+      "label": "未通過",
+      "sublabel": "顯示主辦單位的說明",
+      "tag": "可改判"
+    },
+    {
+      "id": "suspended",
+      "type": "failure",
+      "label": "已停權",
+      "sublabel": "已登入的人也會登出",
+      "tag": "可復權"
+    }
+  ],
+  "transitions": [
+    {
+      "id": "t-register",
+      "from": "register",
+      "to": "pending",
+      "label": "送出註冊"
+    },
+    {
+      "id": "t-queue",
+      "from": "pending",
+      "to": "review",
+      "label": "送交主辦"
+    },
+    {
+      "id": "t-approve",
+      "from": "review",
+      "to": "approved",
+      "label": "核准"
+    },
+    {
+      "id": "t-reject",
+      "from": "review",
+      "to": "rejected",
+      "label": "未通過",
+      "variant": "security"
+    },
+    {
+      "id": "t-overturn",
+      "from": "rejected",
+      "to": "approved",
+      "label": "改判核准",
+      "variant": "emphasis"
+    },
+    {
+      "id": "t-suspend",
+      "from": "approved",
+      "to": "suspended",
+      "label": "停權",
+      "variant": "security"
+    },
+    {
+      "id": "t-reinstate",
+      "from": "suspended",
+      "to": "approved",
+      "label": "復權",
+      "variant": "emphasis"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "amber",
+      "title": "登入時會看到",
+      "items": [
+        "待審核：核准後即可登入",
+        "未通過、已停權：顯示原因與說明",
+        "待審核、未通過、已停權都不能登入"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "主辦單位可以做的",
+      "items": [
+        "核准或不通過；不通過可改判核准",
+        "已核准可停權，停權後可復權",
+        "沒有終止狀態：每一種都能改回"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "通知",
+      "items": [
+        "每次審核結果都寄信給單位所有帳號",
+        "通知信中英並列"
+      ]
+    }
+  ]
+}

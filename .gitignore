@@ -1,0 +1,4 @@
+# Archify 的交付與檢查紀錄含本機完整路徑，只留在本機
+_evidence/
+*.delivery.json
+*.visual-check.*

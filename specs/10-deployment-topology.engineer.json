@@ -1,0 +1,327 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Albireo 部署拓撲（開發機）",
+    "output": "engineer/10-deployment-topology.html",
+    "locale": "zh-TW",
+    "quality_profile": "showcase",
+    "views": [
+      {
+        "id": "edge",
+        "label": "對外入口",
+        "focus": [
+          "browser",
+          "ai_client",
+          "cloudflare",
+          "nginx"
+        ],
+        "note": "Cloudflare 代理 DNS，主機 nginx 以 onpremiseadvisor.com 憑證終結 HTTPS，再依網域轉發。"
+      },
+      {
+        "id": "containers",
+        "label": "容器與宿主機埠號",
+        "focus": [
+          "nginx",
+          "fe",
+          "api",
+          "mcp"
+        ],
+        "note": "埠號規則：1 + 專案代碼 05 + 角色（1 後端、2 前端）+ 序號；容器只開 HTTP。"
+      },
+      {
+        "id": "data",
+        "label": "共用資料與外部服務",
+        "focus": [
+          "api",
+          "mcp",
+          "pg",
+          "redis",
+          "openrouter",
+          "smtp"
+        ],
+        "note": "API 與 MCP 容器都連同一組 PostgreSQL 與 Redis；只有 API 容器呼叫 OpenRouter 與寄信。"
+      }
+    ]
+  },
+  "components": [
+    {
+      "id": "browser",
+      "type": "external",
+      "label": "瀏覽器",
+      "sublabel": "三端前端使用者",
+      "pos": [
+        30,
+        266
+      ],
+      "size": [
+        140,
+        68
+      ]
+    },
+    {
+      "id": "ai_client",
+      "type": "external",
+      "label": "AI 用戶端",
+      "sublabel": "Bearer API 金鑰",
+      "brand": "claude",
+      "pos": [
+        30,
+        430
+      ],
+      "size": [
+        140,
+        68
+      ]
+    },
+    {
+      "id": "cloudflare",
+      "type": "cloud",
+      "label": "Cloudflare",
+      "sublabel": "DNS 代理",
+      "brand": "cloudflare",
+      "pos": [
+        230,
+        266
+      ],
+      "size": [
+        140,
+        68
+      ]
+    },
+    {
+      "id": "nginx",
+      "type": "security",
+      "label": "主機 nginx",
+      "sublabel": "443 · 依網域轉發",
+      "pos": [
+        460,
+        266
+      ],
+      "size": [
+        150,
+        68
+      ]
+    },
+    {
+      "id": "fe",
+      "type": "frontend",
+      "label": "前端容器 ×3",
+      "sublabel": "10521–10523 · nginx :80",
+      "pos": [
+        680,
+        60
+      ],
+      "size": [
+        180,
+        68
+      ]
+    },
+    {
+      "id": "api",
+      "type": "backend",
+      "label": "API 容器 ×3",
+      "sublabel": "10511–10513 · :8080",
+      "pos": [
+        680,
+        266
+      ],
+      "size": [
+        180,
+        68
+      ]
+    },
+    {
+      "id": "mcp",
+      "type": "backend",
+      "label": "MCP 容器 ×3",
+      "sublabel": "10514–10516 · SSE 不緩衝",
+      "pos": [
+        680,
+        472
+      ],
+      "size": [
+        180,
+        68
+      ]
+    },
+    {
+      "id": "openrouter",
+      "type": "external",
+      "label": "OpenRouter",
+      "sublabel": "僅 API 容器",
+      "brand": "openrouter",
+      "pos": [
+        950,
+        120
+      ],
+      "size": [
+        160,
+        68
+      ]
+    },
+    {
+      "id": "smtp",
+      "type": "external",
+      "label": "SMTP",
+      "sublabel": "開發：Mailpit 沙盒",
+      "pos": [
+        1170,
+        120
+      ],
+      "size": [
+        160,
+        68
+      ]
+    },
+    {
+      "id": "pg",
+      "type": "database",
+      "label": "PostgreSQL",
+      "sublabel": "albireo_main",
+      "brand": "postgresql",
+      "pos": [
+        950,
+        370
+      ],
+      "size": [
+        160,
+        68
+      ]
+    },
+    {
+      "id": "redis",
+      "type": "database",
+      "label": "Redis",
+      "sublabel": "db 11",
+      "brand": "redis",
+      "pos": [
+        1170,
+        370
+      ],
+      "size": [
+        160,
+        68
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "開發機 · Docker docker-network",
+      "wraps": [
+        "nginx",
+        "fe",
+        "api",
+        "mcp"
+      ],
+      "pad": 22
+    },
+    {
+      "kind": "region",
+      "label": "共用開發環境",
+      "wraps": [
+        "pg",
+        "redis"
+      ],
+      "pad": 18
+    }
+  ],
+  "connections": [
+    {
+      "id": "c_browser",
+      "from": "browser",
+      "to": "cloudflare",
+      "label": "HTTPS",
+      "variant": "emphasis"
+    },
+    {
+      "id": "c_ai",
+      "from": "ai_client",
+      "to": "cloudflare",
+      "variant": "security"
+    },
+    {
+      "id": "c_cf",
+      "from": "cloudflare",
+      "to": "nginx",
+      "label": "HTTPS :443",
+      "variant": "security"
+    },
+    {
+      "id": "c_fe",
+      "from": "nginx",
+      "to": "fe"
+    },
+    {
+      "id": "c_api",
+      "from": "nginx",
+      "to": "api",
+      "variant": "emphasis"
+    },
+    {
+      "id": "c_mcp",
+      "from": "nginx",
+      "to": "mcp"
+    },
+    {
+      "id": "c_api_or",
+      "from": "api",
+      "to": "openrouter"
+    },
+    {
+      "id": "c_api_smtp",
+      "from": "api",
+      "to": "smtp"
+    },
+    {
+      "id": "c_api_pg",
+      "from": "api",
+      "to": "pg"
+    },
+    {
+      "id": "c_api_redis",
+      "from": "api",
+      "to": "redis"
+    },
+    {
+      "id": "c_mcp_pg",
+      "from": "mcp",
+      "to": "pg"
+    },
+    {
+      "id": "c_mcp_redis",
+      "from": "mcp",
+      "to": "redis"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "對外入口",
+      "items": [
+        "網域 albireo-*-frontend／-backend／-mcp.onpremiseadvisor.com，Cloudflare 開啟代理",
+        "主機 nginx 用 onpremiseadvisor.com 憑證終結 HTTPS，轉發到 127.0.0.1 的宿主機埠號",
+        "MCP 那份 nginx：proxy_buffering off、HTTP/1.1、body 上限 1m；營運端 MCP 正式環境不對外"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "容器與設定",
+      "items": [
+        "後端容器只開 HTTP 8080，前端容器是 nginx:alpine 的 :80",
+        "appsettings.{環境}.json 不進映像，由 compose 掛入；日誌掛到 ~/albireo-volumes/*-logs",
+        "前端 VITE_API_URL 在建構時打包，改了要重建映像"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "GitLab CI/CD",
+      "items": [
+        "Runner albireo-runner；只有 develop 推送時部署，stage、main 尚未設定",
+        "SSH 到開發機 → git reset 到 origin/develop → docker compose up --build",
+        "後端以 matrix 平行部署六個主機；staging、production 的 compose 埠號相同"
+      ]
+    }
+  ]
+}
